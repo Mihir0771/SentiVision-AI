@@ -1,0 +1,217 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard — SentiVision AI{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-lg-4 py-4">
+
+    <!-- Hero Section -->
+    <div class="hero-card p-4 p-md-5 rounded-4 mb-4 shadow-sm position-relative overflow-hidden">
+        <div class="row align-items-center position-relative z-1">
+            <div class="col-lg-8">
+                <span class="badge bg-accent-soft text-accent px-3 py-2 rounded-pill fw-semibold mb-3">
+                    <i class="fas fa-sparkles me-1"></i> Multi-Model AI Platform
+                </span>
+                <h1 class="display-6 fw-bold mb-2">Welcome to <span class="gradient-text">SentiVision AI</span></h1>
+                <p class="lead text-secondary mb-4">
+                    Analyze social reviews, product feedback, and real-time facial expressions using state-of-the-art HuggingFace Transformers, VADER, and OpenCV Computer Vision.
+                </p>
+                <div class="d-flex flex-wrap gap-3">
+                    <a href="{{ url_for('analysis.analyze_text') }}" class="btn btn-accent px-4 py-2">
+                        <i class="fas fa-comment-dots me-2"></i>Analyze Text
+                    </a>
+                    <a href="{{ url_for('camera.live_camera') }}" class="btn btn-outline-accent px-4 py-2">
+                        <i class="fas fa-video me-2"></i>Live Face Emotion
+                    </a>
+                    <a href="{{ url_for('batch.index') }}" class="btn btn-outline-secondary px-4 py-2">
+                        <i class="fas fa-file-upload me-2"></i>Batch Upload
+                    </a>
+                </div>
+            </div>
+            <div class="col-lg-4 d-none d-lg-block text-center">
+                <i class="fas fa-brain fa-8x text-accent opacity-50 pulse-animation"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Stats Cards Row -->
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-xl-3">
+            <div class="card stat-card border-0 rounded-4 shadow-sm p-3 h-100">
+                <div class="d-flex align-items-center justify-content-between mb-2">
+                    <span class="text-secondary small fw-semibold text-uppercase">Total Analyses</span>
+                    <div class="stat-icon-wrapper bg-primary-subtle text-primary">
+                        <i class="fas fa-database"></i>
+                    </div>
+                </div>
+                <h2 class="stat-number fw-bold mb-0" data-target="{{ stats.total_analyses or 0 }}">{{ stats.total_analyses or 0 }}</h2>
+                <div class="small text-muted mt-1"><i class="fas fa-arrow-up text-success me-1"></i>Session &amp; historical</div>
+            </div>
+        </div>
+
+        <div class="col-6 col-xl-3">
+            <div class="card stat-card border-0 rounded-4 shadow-sm p-3 h-100">
+                <div class="d-flex align-items-center justify-content-between mb-2">
+                    <span class="text-secondary small fw-semibold text-uppercase">Positive Sentiment</span>
+                    <div class="stat-icon-wrapper bg-success-subtle text-success">
+                        <i class="fas fa-smile"></i>
+                    </div>
+                </div>
+                <h2 class="stat-number text-success fw-bold mb-0" data-target="{{ stats.positive_pct or 0 }}" data-percent="true">{{ stats.positive_pct or 0 }}%</h2>
+                <div class="small text-muted mt-1">{{ sentiment_distribution.positive or 0 }} records classified</div>
+            </div>
+        </div>
+
+        <div class="col-6 col-xl-3">
+            <div class="card stat-card border-0 rounded-4 shadow-sm p-3 h-100">
+                <div class="d-flex align-items-center justify-content-between mb-2">
+                    <span class="text-secondary small fw-semibold text-uppercase">Negative Sentiment</span>
+                    <div class="stat-icon-wrapper bg-danger-subtle text-danger">
+                        <i class="fas fa-frown"></i>
+                    </div>
+                </div>
+                <h2 class="stat-number text-danger fw-bold mb-0" data-target="{{ stats.negative_pct or 0 }}" data-percent="true">{{ stats.negative_pct or 0 }}%</h2>
+                <div class="small text-muted mt-1">{{ sentiment_distribution.negative or 0 }} records classified</div>
+            </div>
+        </div>
+
+        <div class="col-6 col-xl-3">
+            <div class="card stat-card border-0 rounded-4 shadow-sm p-3 h-100">
+                <div class="d-flex align-items-center justify-content-between mb-2">
+                    <span class="text-secondary small fw-semibold text-uppercase">Average Confidence</span>
+                    <div class="stat-icon-wrapper bg-warning-subtle text-warning">
+                        <i class="fas fa-chart-pie"></i>
+                    </div>
+                </div>
+                <h2 class="stat-number fw-bold mb-0" data-target="{{ ((stats.avg_confidence or 0.85) * 100)|round(1) }}" data-percent="true">{{ ((stats.avg_confidence or 0.85) * 100)|round(1) }}%</h2>
+                <div class="small text-muted mt-1">Multi-model ensemble</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Row -->
+    <div class="row g-4 mb-4">
+        <!-- Sentiment Doughnut -->
+        <div class="col-lg-4">
+            <div class="card border-0 rounded-4 shadow-sm p-4 h-100">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="fw-bold mb-0">Sentiment Distribution</h5>
+                    <span class="badge text-bg-secondary">Ensemble</span>
+                </div>
+                <div class="chart-container position-relative" style="height: 270px;">
+                    <canvas id="sentimentDoughnut"
+                            data-positive="{{ sentiment_distribution.positive or 0 }}"
+                            data-negative="{{ sentiment_distribution.negative or 0 }}"
+                            data-neutral="{{ sentiment_distribution.neutral or 0 }}"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Timeline Trend Chart -->
+        <div class="col-lg-5">
+            <div class="card border-0 rounded-4 shadow-sm p-4 h-100">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="fw-bold mb-0">Sentiment Trend</h5>
+                    <span class="badge text-bg-secondary">Recent Activity</span>
+                </div>
+                <div class="chart-container position-relative" style="height: 270px;">
+                    <canvas id="timelineChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Emotion Radar Chart -->
+        <div class="col-lg-3">
+            <div class="card border-0 rounded-4 shadow-sm p-4 h-100">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="fw-bold mb-0">Facial Emotion Radar</h5>
+                    <a href="{{ url_for('camera.live_camera') }}" class="small text-accent text-decoration-none">Open Live &rarr;</a>
+                </div>
+                <div class="chart-container position-relative" style="height: 270px;">
+                    <canvas id="emotionRadarChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Analyses Table -->
+    <div class="card border-0 rounded-4 shadow-sm p-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <div>
+                <h5 class="fw-bold mb-1">Recent Analyses</h5>
+                <p class="text-secondary small mb-0">Latest text, URL, batch, and facial inspection sessions</p>
+            </div>
+            <a href="{{ url_for('analysis.history') }}" class="btn btn-sm btn-outline-accent">
+                View All History <i class="fas fa-arrow-right ms-1"></i>
+            </a>
+        </div>
+
+        {% if recent_analyses %}
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Type</th>
+                        <th>Input Preview</th>
+                        <th>Sentiment</th>
+                        <th>Confidence</th>
+                        <th>Date</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in recent_analyses %}
+                    <tr>
+                        <td>
+                            <span class="badge bg-secondary text-uppercase">{{ item.analysis_type }}</span>
+                        </td>
+                        <td>
+                            <span class="text-truncate d-inline-block" style="max-width: 380px;">
+                                {{ item.input_data or 'Analysis record' }}
+                            </span>
+                        </td>
+                        <td>
+                            <span class="badge {% if item.overall_sentiment == 'positive' %}bg-success{% elif item.overall_sentiment == 'negative' %}bg-danger{% else %}bg-warning text-dark{% endif %} text-uppercase">
+                                {{ item.overall_sentiment }}
+                            </span>
+                        </td>
+                        <td>
+                            <div class="d-flex align-items-center gap-2">
+                                <div class="progress flex-grow-1" style="height: 6px; width: 60px;">
+                                    <div class="progress-bar {% if item.overall_sentiment == 'positive' %}bg-success{% elif item.overall_sentiment == 'negative' %}bg-danger{% else %}bg-warning{% endif %}"
+                                         style="width: {{ (item.confidence * 100)|round }}%;"></div>
+                                </div>
+                                <span class="small fw-semibold">{{ (item.confidence * 100)|round }}%</span>
+                            </div>
+                        </td>
+                        <td class="text-muted small">
+                            {{ item.created_at[:10] if item.created_at else 'Recent' }}
+                        </td>
+                        <td class="text-end">
+                            <a href="{{ url_for('analysis.view_result', analysis_id=item.id) }}" class="btn btn-sm btn-outline-secondary">
+                                <i class="fas fa-eye"></i> Report
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center py-5">
+            <i class="fas fa-inbox fa-3x text-secondary mb-3"></i>
+            <h6 class="fw-bold">No analyses recorded yet</h6>
+            <p class="text-muted small mb-3">Start by analyzing sample reviews or enabling your webcam for emotion tracking.</p>
+            <a href="{{ url_for('analysis.analyze_text') }}" class="btn btn-accent btn-sm">
+                <i class="fas fa-play me-1"></i>Start Your First Analysis
+            </a>
+        </div>
+        {% endif %}
+    </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+{% endblock %}

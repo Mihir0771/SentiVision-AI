@@ -1,0 +1,100 @@
+# =============================================================================
+# SentiVision AI — Docker Compose
+# =============================================================================
+# Usage:
+#   docker-compose up -d          # Start all services
+#   docker-compose down           # Stop all services
+#   docker-compose logs -f web    # Follow web logs
+# =============================================================================
+
+services:
+  # ---------------------------------------------------------------------------
+  # Web Application
+  # ---------------------------------------------------------------------------
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: sentivision-web
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    env_file:
+      - .env
+    environment:
+      - MONGO_URI=mongodb://mongo:27017/sentivision
+      - FLASK_ENV=production
+    volumes:
+      - uploads_data:/app/uploads
+      - reports_data:/app/reports
+    depends_on:
+      mongo:
+        condition: service_healthy
+    networks:
+      - sentivision-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # ---------------------------------------------------------------------------
+  # MongoDB Database
+  # ---------------------------------------------------------------------------
+  mongo:
+    image: mongo:7.0
+    container_name: sentivision-mongo
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_DATABASE: sentivision
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - sentivision-network
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  # ---------------------------------------------------------------------------
+  # Mongo Express — Database Admin UI (development only)
+  # ---------------------------------------------------------------------------
+  mongo-express:
+    image: mongo-express:1.0
+    container_name: sentivision-mongo-express
+    restart: unless-stopped
+    ports:
+      - "8081:8081"
+    environment:
+      ME_CONFIG_MONGODB_URL: mongodb://mongo:27017/
+      ME_CONFIG_BASICAUTH: "false"
+    depends_on:
+      mongo:
+        condition: service_healthy
+    networks:
+      - sentivision-network
+    profiles:
+      - debug
+
+# =============================================================================
+# Networks
+# =============================================================================
+networks:
+  sentivision-network:
+    driver: bridge
+
+# =============================================================================
+# Volumes
+# =============================================================================
+volumes:
+  mongo_data:
+    driver: local
+  uploads_data:
+    driver: local
+  reports_data:
+    driver: local

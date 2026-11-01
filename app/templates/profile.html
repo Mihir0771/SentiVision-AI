@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+
+{% block title %}User Profile — SentiVision AI{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            
+            <div class="card border-0 rounded-4 shadow-sm p-4 p-md-5 mb-4">
+                <div class="d-flex align-items-center gap-4 mb-4 pb-3 border-bottom">
+                    <div class="rounded-circle bg-accent-soft p-4 text-accent d-flex align-items-center justify-content-center" style="width: 80px; height: 80px;">
+                        <i class="fas fa-user-circle fa-3x"></i>
+                    </div>
+                    <div>
+                        <h3 class="fw-bold mb-1">{{ user.username }}</h3>
+                        <p class="text-secondary mb-1">{{ user.email }}</p>
+                        <span class="badge bg-success-subtle text-success border border-success-subtle">Active Account</span>
+                    </div>
+                </div>
+
+                <h5 class="fw-bold mb-3"><i class="fas fa-chart-pie text-accent me-2"></i>Account Sentiment Summary</h5>
+                <div class="row g-3 mb-4">
+                    <div class="col-4">
+                        <div class="p-3 bg-dark-subtle rounded-3 text-center">
+                            <span class="small text-secondary fw-semibold text-uppercase d-block">Analyses</span>
+                            <h4 class="fw-bold mb-0 mt-1">{{ stats.total_analyses or 0 }}</h4>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="p-3 bg-dark-subtle rounded-3 text-center">
+                            <span class="small text-secondary fw-semibold text-uppercase d-block">Positive %</span>
+                            <h4 class="fw-bold text-success mb-0 mt-1">{{ stats.positive_pct or 0 }}%</h4>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="p-3 bg-dark-subtle rounded-3 text-center">
+                            <span class="small text-secondary fw-semibold text-uppercase d-block">Avg Confidence</span>
+                            <h4 class="fw-bold text-accent mb-0 mt-1">{{ ((stats.avg_confidence or 0.85) * 100)|round }}%</h4>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex flex-wrap gap-2">
+                    <a href="{{ url_for('analysis.history') }}" class="btn btn-accent">
+                        <i class="fas fa-history me-1"></i>View My History
+                    </a>
+                    <a href="{{ url_for('reports.export_all_csv') }}" class="btn btn-outline-success">
+                        <i class="fas fa-file-csv me-1"></i>Download All Data
+                    </a>
+                    <a href="{{ url_for('auth.logout') }}" class="btn btn-outline-danger ms-auto">
+                        <i class="fas fa-sign-out-alt me-1"></i>Sign Out
+                    </a>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock %}

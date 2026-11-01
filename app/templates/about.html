@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+
+{% block title %}About — SentiVision AI{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-lg-4 py-4">
+
+    <!-- Hero -->
+    <div class="card border-0 rounded-4 shadow-sm p-4 p-md-5 mb-4 text-center">
+        <div class="brand-icon-wrapper mb-3 d-inline-flex p-3 rounded-circle bg-accent-soft mx-auto">
+            <i class="fas fa-brain fa-3x text-accent"></i>
+        </div>
+        <h1 class="display-6 fw-bold mb-2">About <span class="gradient-text">SentiVision AI</span></h1>
+        <p class="lead text-secondary mx-auto mb-4" style="max-width: 720px;">
+            An end-to-end sentiment intelligence platform uniting deep learning NLP with real-time facial expression tracking to decode human emotion across social reviews and camera streams.
+        </p>
+        <div class="d-flex justify-content-center gap-3">
+            <a href="{{ url_for('analysis.analyze_text') }}" class="btn btn-accent px-4 py-2">
+                <i class="fas fa-play me-2"></i>Try Text Engine
+            </a>
+            <a href="{{ url_for('camera.live_camera') }}" class="btn btn-outline-accent px-4 py-2">
+                <i class="fas fa-video me-2"></i>Live Webcam AI
+            </a>
+        </div>
+    </div>
+
+    <!-- Tech Stack Grid -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-6 col-lg-3">
+            <div class="card border-0 rounded-4 shadow-sm p-4 h-100 text-center">
+                <i class="fab fa-python fa-3x text-primary mb-3"></i>
+                <h5 class="fw-bold mb-2">Python &amp; Flask</h5>
+                <p class="text-secondary small mb-0">Production WSGI application factory with Socket.IO websockets and REST API endpoints.</p>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-lg-3">
+            <div class="card border-0 rounded-4 shadow-sm p-4 h-100 text-center">
+                <i class="fas fa-robot fa-3x text-warning mb-3"></i>
+                <h5 class="fw-bold mb-2">RoBERTa &amp; VADER</h5>
+                <p class="text-secondary small mb-0">HuggingFace Transformers ensemble architecture for social media reviews and slang detection.</p>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-lg-3">
+            <div class="card border-0 rounded-4 shadow-sm p-4 h-100 text-center">
+                <i class="fas fa-eye fa-3x text-info mb-3"></i>
+                <h5 class="fw-bold mb-2">OpenCV &amp; FER</h5>
+                <p class="text-secondary small mb-0">Computer vision pipeline detecting faces and calculating 7-expression emotion spectrums in real-time.</p>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-lg-3">
+            <div class="card border-0 rounded-4 shadow-sm p-4 h-100 text-center">
+                <i class="fas fa-database fa-3x text-success mb-3"></i>
+                <h5 class="fw-bold mb-2">MongoDB Layer</h5>
+                <p class="text-secondary small mb-0">High-throughput NoSQL document persistence for analyses, user sessions, and batch jobs.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Core Features Section -->
+    <div class="card border-0 rounded-4 shadow-sm p-4 mb-4">
+        <h4 class="fw-bold mb-4"><i class="fas fa-list-check text-accent me-2"></i>Platform Capabilities</h4>
+        <div class="row g-4">
+            <div class="col-md-6">
+                <ul class="list-unstyled mb-0 d-flex flex-column gap-3">
+                    <li class="d-flex align-items-start gap-2">
+                        <i class="fas fa-check-circle text-success mt-1"></i>
+                        <div>
+                            <strong>Multi-Model NLP Ensemble:</strong> Weighted consensus between CardiffNLP RoBERTa (deep learning), VADER (rule-based), and TextBlob.
+                        </div>
+                    </li>
+                    <li class="d-flex align-items-start gap-2">
+                        <i class="fas fa-check-circle text-success mt-1"></i>
+                        <div>
+                            <strong>Live Facial Emotion Recognition:</strong> Captures video stream frames via HTML5 canvas, emits over Socket.IO, and overlays live bounding boxes and dominant emotion emojis.
+                        </div>
+                    </li>
+                    <li class="d-flex align-items-start gap-2">
+                        <i class="fas fa-check-circle text-success mt-1"></i>
+                        <div>
+                            <strong>Batch Dataset Processing:</strong> Ingest CSV, JSON, and Excel review spreadsheets with automated column detection and export capabilities.
+                        </div>
+                    </li>
+                </ul>
+            </div>
+            <div class="col-md-6">
+                <ul class="list-unstyled mb-0 d-flex flex-column gap-3">
+                    <li class="d-flex align-items-start gap-2">
+                        <i class="fas fa-check-circle text-success mt-1"></i>
+                        <div>
+                            <strong>Webpage Content Scraper:</strong> Scrapes online articles, reviews, or Reddit threads and summarizes sentiment distribution.
+                        </div>
+                    </li>
+                    <li class="d-flex align-items-start gap-2">
+                        <i class="fas fa-check-circle text-success mt-1"></i>
+                        <div>
+                            <strong>REST API with JWT:</strong> Full programmatic integration with access tokens, batch analysis endpoints, and swagger-style documentation.
+                        </div>
+                    </li>
+                    <li class="d-flex align-items-start gap-2">
+                        <i class="fas fa-check-circle text-success mt-1"></i>
+                        <div>
+                            <strong>Visual Analytics Reports:</strong> Dynamic Chart.js and server-rendered Matplotlib charts with PDF export support.
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

@@ -1,0 +1,191 @@
+{% extends "base.html" %}
+
+{% block title %}Batch File Analysis — SentiVision AI{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-lg-4 py-4">
+
+    <!-- Header -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold mb-1"><i class="fas fa-file-upload text-accent me-2"></i>Batch Review Analyzer</h2>
+            <p class="text-secondary mb-0">Upload CSV, JSON, or Excel files to process thousands of social posts or customer reviews simultaneously</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="{{ url_for('analysis.analyze_text') }}" class="btn btn-outline-secondary btn-sm">
+                <i class="fas fa-comment-dots me-1"></i>Single Text
+            </a>
+            <a href="{{ url_for('analysis.history') }}" class="btn btn-outline-accent btn-sm">
+                <i class="fas fa-history me-1"></i>All Analyses
+            </a>
+        </div>
+    </div>
+
+    <!-- Upload Drop Zone Card -->
+    <div class="card border-0 rounded-4 shadow-sm p-4 mb-4">
+        <div id="batchDropZone" class="drop-zone border border-2 border-dashed rounded-4 p-5 text-center cursor-pointer">
+            <i class="fas fa-cloud-arrow-up fa-3x text-accent mb-3"></i>
+            <h5 class="fw-bold mb-1">Drag and drop your dataset here</h5>
+            <p class="text-secondary small mb-3">Supports .CSV, .JSON, .XLSX, and .XLS files (up to 16MB)</p>
+            <button type="button" class="btn btn-accent px-4 py-2" id="btnSelectBatchFile">
+                <i class="fas fa-folder-open me-2"></i>Browse Computer
+            </button>
+            <input type="file" id="batchFileInput" class="d-none" accept=".csv,.json,.xlsx,.xls">
+        </div>
+
+        <!-- Selected File Status Badge -->
+        <div id="selectedFileInfo" class="d-none mt-3 p-3 rounded-3 bg-dark-subtle border d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center gap-3">
+                <i class="fas fa-file-csv fa-2x text-accent"></i>
+                <div>
+                    <h6 class="mb-0 fw-bold" id="batchFileName">reviews.csv</h6>
+                    <span class="text-muted small" id="batchFileSize">1.2 MB</span>
+                </div>
+            </div>
+            <span class="badge bg-success-subtle text-success border border-success-subtle px-3 py-2">
+                <i class="fas fa-check-circle me-1"></i>Ready for schema preview
+            </span>
+        </div>
+    </div>
+
+    <!-- Configuration & Schema Preview Section -->
+    <div id="batchConfigSection" class="card border-0 rounded-4 shadow-sm p-4 mb-4 d-none">
+        <h5 class="fw-bold mb-3"><i class="fas fa-table-columns text-accent me-2"></i>Map Review Column &amp; Preview</h5>
+        <div class="row align-items-end g-3 mb-4">
+            <div class="col-md-6 col-lg-4">
+                <label for="textColumnSelect" class="form-label small fw-semibold text-secondary">
+                    Select Text / Review Column:
+                </label>
+                <select class="form-select" id="textColumnSelect">
+                    <!-- Populated dynamically -->
+                </select>
+                <div class="form-text small">Automatically auto-detected by column header heuristics.</div>
+            </div>
+            <div class="col-md-6 col-lg-4">
+                <button type="button" class="btn btn-accent px-4 py-2 w-100" id="btnStartBatchProcessing">
+                    <i class="fas fa-play me-2"></i>Run Sentiment Analysis
+                </button>
+            </div>
+        </div>
+
+        <div class="mb-2">
+            <span class="small fw-semibold text-secondary">Preview First 5 Rows:</span>
+        </div>
+        <div id="previewTableContainer" class="rounded-3 border overflow-hidden">
+            <!-- Sample rows rendered here -->
+        </div>
+    </div>
+
+    <!-- Batch Results Dashboard -->
+    <div id="batchResultsSection" class="d-none">
+        <hr class="my-4 border-secondary opacity-25">
+
+        <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
+            <div>
+                <h3 class="fw-bold mb-1"><i class="fas fa-chart-pie text-accent me-2"></i>Batch Analysis Report</h3>
+                <p class="text-secondary small mb-0">Summary statistics and classified rows</p>
+            </div>
+            <div class="d-flex gap-2 mt-2 mt-sm-0">
+                <a href="#" id="btnExportBatchCsv" class="btn btn-outline-success btn-sm">
+                    <i class="fas fa-file-csv me-1"></i>Export CSV
+                </a>
+                <a href="#" id="btnExportBatchJson" class="btn btn-outline-info btn-sm">
+                    <i class="fas fa-file-code me-1"></i>Export JSON
+                </a>
+            </div>
+        </div>
+
+        <!-- Summary Metric Cards -->
+        <div class="row g-3 mb-4">
+            <div class="col-6 col-md-4 col-xl">
+                <div class="card border-0 rounded-4 shadow-sm p-3 text-center">
+                    <span class="text-secondary small fw-semibold text-uppercase">Total Items</span>
+                    <h3 class="fw-bold mb-0 mt-2" id="batchTotalItems">0</h3>
+                </div>
+            </div>
+            <div class="col-6 col-md-4 col-xl">
+                <div class="card border-0 rounded-4 shadow-sm p-3 text-center">
+                    <span class="text-secondary small fw-semibold text-uppercase">Positive</span>
+                    <h3 class="fw-bold text-success mb-0 mt-2" id="batchPositivePct">0%</h3>
+                </div>
+            </div>
+            <div class="col-6 col-md-4 col-xl">
+                <div class="card border-0 rounded-4 shadow-sm p-3 text-center">
+                    <span class="text-secondary small fw-semibold text-uppercase">Negative</span>
+                    <h3 class="fw-bold text-danger mb-0 mt-2" id="batchNegativePct">0%</h3>
+                </div>
+            </div>
+            <div class="col-6 col-md-6 col-xl">
+                <div class="card border-0 rounded-4 shadow-sm p-3 text-center">
+                    <span class="text-secondary small fw-semibold text-uppercase">Neutral</span>
+                    <h3 class="fw-bold text-warning mb-0 mt-2" id="batchNeutralPct">0%</h3>
+                </div>
+            </div>
+            <div class="col-12 col-md-6 col-xl">
+                <div class="card border-0 rounded-4 shadow-sm p-3 text-center">
+                    <span class="text-secondary small fw-semibold text-uppercase">Avg Confidence</span>
+                    <h3 class="fw-bold mb-0 mt-2" id="batchAvgConfidence">0%</h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4 mb-4">
+            <!-- Sentiment Doughnut -->
+            <div class="col-lg-4">
+                <div class="card border-0 rounded-4 shadow-sm p-4 h-100">
+                    <h6 class="fw-bold mb-3">Batch Sentiment Breakdown</h6>
+                    <div class="chart-container position-relative" style="height: 250px;">
+                        <canvas id="batchDistributionChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Classified Items Table -->
+            <div class="col-lg-8">
+                <div class="card border-0 rounded-4 shadow-sm p-4 h-100">
+                    <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2">
+                        <h6 class="fw-bold mb-0">Processed Reviews</h6>
+                        <div class="d-flex gap-2">
+                            <input type="text" id="batchSearchFilter" class="form-control form-control-sm" placeholder="Filter text…">
+                            <select id="batchSentimentFilter" class="form-select form-select-sm">
+                                <option value="all">All Sentiments</option>
+                                <option value="positive">Positive</option>
+                                <option value="negative">Negative</option>
+                                <option value="neutral">Neutral</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="table-responsive flex-grow-1">
+                        <table class="table table-hover align-middle mb-0 small">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>#</th>
+                                    <th>Review Text</th>
+                                    <th>Sentiment</th>
+                                    <th>Confidence</th>
+                                </tr>
+                            </thead>
+                            <tbody id="batchTableBody">
+                                <!-- Populated dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Pagination -->
+                    <nav class="mt-3">
+                        <ul class="pagination pagination-sm justify-content-end mb-0" id="batchPagination">
+                            <!-- Populated dynamically -->
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/batch.js') }}"></script>
+{% endblock %}

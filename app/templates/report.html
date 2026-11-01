@@ -1,0 +1,176 @@
+{% extends "base.html" %}
+
+{% block title %}Analysis Report — SentiVision AI{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-lg-4 py-4">
+
+    <!-- Header & Action Buttons -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
+        <div>
+            <div class="d-flex align-items-center gap-2 mb-1">
+                <a href="{{ url_for('analysis.history') }}" class="text-secondary text-decoration-none">
+                    <i class="fas fa-arrow-left me-1"></i> History
+                </a>
+                <span class="text-secondary">/</span>
+                <span class="text-muted small">Record {{ analysis.id[:8] if analysis else 'Report' }}</span>
+            </div>
+            <h2 class="fw-bold mb-0">Detailed Sentiment &amp; Emotion Report</h2>
+        </div>
+        <div class="d-flex gap-2 mt-3 mt-md-0">
+            {% if analysis and analysis.id %}
+            <a href="{{ url_for('reports.download_report', analysis_id=analysis.id) }}" class="btn btn-outline-danger btn-sm">
+                <i class="fas fa-file-pdf me-1"></i>Download PDF
+            </a>
+            {% endif %}
+            <button class="btn btn-outline-secondary btn-sm" onclick="window.print()">
+                <i class="fas fa-print me-1"></i>Print Report
+            </button>
+        </div>
+    </div>
+
+    {% if analysis %}
+    <!-- Summary Header Card -->
+    <div class="card border-0 rounded-4 shadow-sm p-4 mb-4">
+        <div class="row align-items-center g-4">
+            <div class="col-lg-8">
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <span class="badge bg-secondary text-uppercase">{{ analysis.analysis_type }}</span>
+                    <span class="text-muted small">ID: <code>{{ analysis.id }}</code></span>
+                    <span class="text-muted small">&bull; {{ analysis.created_at[:19].replace('T', ' ') if analysis.created_at else '' }} UTC</span>
+                </div>
+                <h5 class="fw-semibold text-secondary mb-2">Analyzed Input:</h5>
+                <blockquote class="blockquote bg-dark-subtle p-3 rounded-3 border-start border-4 border-accent mb-0 fs-6">
+                    {{ analysis.input_data }}
+                </blockquote>
+            </div>
+
+            <div class="col-lg-4 text-center border-start-lg">
+                <span class="text-secondary small fw-semibold text-uppercase d-block mb-2">Classified Sentiment</span>
+                <span class="badge fs-4 p-3 {% if analysis.overall_sentiment == 'positive' %}bg-success{% elif analysis.overall_sentiment == 'negative' %}bg-danger{% else %}bg-warning text-dark{% endif %} text-uppercase">
+                    <i class="fas {% if analysis.overall_sentiment == 'positive' %}fa-smile-beam{% elif analysis.overall_sentiment == 'negative' %}fa-frown{% else %}fa-meh{% endif %} me-2"></i>
+                    {{ analysis.overall_sentiment }}
+                </span>
+                <div class="mt-2 text-muted small">
+                    Confidence: <strong>{{ (analysis.confidence * 100)|round(1) }}%</strong>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4 mb-4">
+        <!-- Visual Generated Chart -->
+        <div class="col-lg-6">
+            <div class="card border-0 rounded-4 shadow-sm p-4 h-100">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="fw-bold mb-0"><i class="fas fa-chart-pie text-accent me-2"></i>Visualization</h5>
+                    <span class="badge text-bg-secondary">Generated via Matplotlib</span>
+                </div>
+                <div class="text-center p-2">
+                    <img src="{{ url_for('reports.get_chart', analysis_id=analysis.id, chart_type='pie') }}"
+                         class="img-fluid rounded-3 shadow-sm"
+                         alt="Sentiment Chart"
+                         onerror="this.src='/static/img/logo.svg'; this.style.maxHeight='150px';">
+                </div>
+            </div>
+        </div>
+
+        <!-- Per-Model Consensus Breakdown -->
+        <div class="col-lg-6">
+            <div class="card border-0 rounded-4 shadow-sm p-4 h-100">
+                <h5 class="fw-bold mb-3"><i class="fas fa-microchip text-accent me-2"></i>Model Specific Outputs</h5>
+                
+                {% if analysis.analysis_type == 'facial' %}
+                <!-- Facial Emotion Breakdown -->
+                <div class="p-3 bg-dark-subtle rounded-3 mb-3">
+                    <h6 class="fw-bold mb-2">Face Recognition Metrics:</h6>
+                    <ul class="list-unstyled mb-0 small">
+                        {% set faces = analysis.results.get('faces', []) %}
+                        {% if faces %}
+                            {% for emotion, score in faces[0].get('emotions', {}).items() %}
+                            <li class="d-flex justify-content-between py-1 border-bottom">
+                                <span class="text-capitalize">{{ emotion }}:</span>
+                                <strong>{{ (score * 100)|round(1) }}%</strong>
+                            </li>
+                            {% endfor %}
+                        {% else %}
+                            <li class="text-muted">No individual facial boxes stored.</li>
+                        {% endif %}
+                    </ul>
+                </div>
+                {% else %}
+                <!-- Text Model Consensus -->
+                <div class="d-flex flex-column gap-3">
+                    {% set models = analysis.results.get('models', {}) %}
+                    
+                    <div class="p-3 bg-dark-subtle rounded-3 border">
+                        <div class="d-flex justify-content-between">
+                            <strong>RoBERTa Transformer:</strong>
+                            <span class="badge bg-primary text-uppercase">{{ models.get('transformer', {}).get('label', 'N/A') }}</span>
+                        </div>
+                        <div class="small text-muted mt-1">Confidence: {{ (models.get('transformer', {}).get('confidence', 0.0) * 100)|round(1) }}%</div>
+                    </div>
+
+                    <div class="p-3 bg-dark-subtle rounded-3 border">
+                        <div class="d-flex justify-content-between">
+                            <strong>VADER Lexicon:</strong>
+                            <span class="badge bg-success text-uppercase">{{ models.get('vader', {}).get('label', 'N/A') }}</span>
+                        </div>
+                        <div class="small text-muted mt-1">Compound: {{ models.get('vader', {}).get('compound', 0.0) }}</div>
+                    </div>
+
+                    <div class="p-3 bg-dark-subtle rounded-3 border">
+                        <div class="d-flex justify-content-between">
+                            <strong>TextBlob Engine:</strong>
+                            <span class="badge bg-warning text-dark text-uppercase">{{ models.get('textblob', {}).get('label', 'N/A') }}</span>
+                        </div>
+                        <div class="small text-muted mt-1">Polarity: {{ models.get('textblob', {}).get('polarity', 0.0) }} &bull; Subjectivity: {{ models.get('textblob', {}).get('subjectivity', 0.0) }}</div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Keywords & Metadata -->
+    <div class="row g-4">
+        {% if analysis.keywords %}
+        <div class="col-md-6">
+            <div class="card border-0 rounded-4 shadow-sm p-4 h-100">
+                <h6 class="fw-bold mb-3"><i class="fas fa-tags text-accent me-2"></i>Extracted Key Phrases</h6>
+                <div class="d-flex flex-wrap gap-2">
+                    {% for kw in analysis.keywords %}
+                    <span class="badge bg-secondary-subtle text-light border p-2">{{ kw }}</span>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        {% if analysis.entities %}
+        <div class="col-md-6">
+            <div class="card border-0 rounded-4 shadow-sm p-4 h-100">
+                <h6 class="fw-bold mb-3"><i class="fas fa-id-badge text-accent me-2"></i>Named Entities</h6>
+                <div class="d-flex flex-wrap gap-2">
+                    {% for ent in analysis.entities %}
+                    <span class="badge bg-dark border border-secondary p-2">
+                        <strong class="text-accent">{{ ent.type }}:</strong> {{ ent.text }}
+                    </span>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    {% else %}
+    <div class="card border-0 rounded-4 shadow-sm p-5 text-center">
+        <i class="fas fa-file-excel fa-3x text-secondary mb-3"></i>
+        <h5 class="fw-bold">No Analysis Selected</h5>
+        <p class="text-secondary small mb-3">Choose a session from history or create a new sentiment analysis.</p>
+        <a href="{{ url_for('analysis.history') }}" class="btn btn-accent btn-sm">Browse History</a>
+    </div>
+    {% endif %}
+
+</div>
+{% endblock %}

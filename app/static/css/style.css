@@ -1,0 +1,1018 @@
+/* ==========================================================================
+   SentiVision AI — Custom Stylesheet
+   Professional, modern CSS with dark/light theming, glassmorphism,
+   smooth transitions, and responsive design.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. CSS Custom Properties (Design Tokens)
+   -------------------------------------------------------------------------- */
+:root {
+    /* Accent colours */
+    --accent-start: #667eea;
+    --accent-end: #764ba2;
+    --accent-gradient: linear-gradient(135deg, var(--accent-start), var(--accent-end));
+    --accent-glow: rgba(102, 126, 234, 0.35);
+
+    /* Sentiment colours */
+    --color-positive: #00c853;
+    --color-negative: #ff1744;
+    --color-neutral: #ffc400;
+    --color-mixed: #29b6f6;
+
+    /* Shared radii / shadows */
+    --radius-sm: 0.5rem;
+    --radius-md: 1rem;
+    --radius-lg: 1.5rem;
+    --radius-full: 50rem;
+    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.08);
+    --shadow-md: 0 8px 30px rgba(0, 0, 0, 0.12);
+    --shadow-lg: 0 16px 48px rgba(0, 0, 0, 0.18);
+
+    /* Transition presets */
+    --transition-fast: 0.2s ease;
+    --transition-base: 0.3s ease;
+    --transition-slow: 0.5s ease;
+}
+
+/* ---- Dark theme (default) ---- */
+[data-bs-theme="dark"] {
+    --bg-primary: #0a0e27;
+    --bg-secondary: #111638;
+    --bg-tertiary: #1a1f4a;
+    --bg-card: rgba(17, 22, 56, 0.65);
+    --bg-card-hover: rgba(26, 31, 74, 0.8);
+    --text-primary: #e8eaf6;
+    --text-secondary: #9fa8da;
+    --text-muted: #7986cb;
+    --border-color: rgba(255, 255, 255, 0.08);
+    --input-bg: rgba(17, 22, 56, 0.6);
+    --input-border: rgba(255, 255, 255, 0.12);
+    --input-focus-border: var(--accent-start);
+    --scrollbar-track: #0d1130;
+    --scrollbar-thumb: #303566;
+    --glass-bg: rgba(17, 22, 56, 0.55);
+    --glass-border: rgba(255, 255, 255, 0.1);
+}
+
+/* ---- Light theme ---- */
+[data-bs-theme="light"] {
+    --bg-primary: #f5f7ff;
+    --bg-secondary: #ffffff;
+    --bg-tertiary: #eef1fb;
+    --bg-card: rgba(255, 255, 255, 0.75);
+    --bg-card-hover: rgba(255, 255, 255, 0.92);
+    --text-primary: #1a1a2e;
+    --text-secondary: #4a4a6a;
+    --text-muted: #8888aa;
+    --border-color: rgba(0, 0, 0, 0.08);
+    --input-bg: rgba(255, 255, 255, 0.8);
+    --input-border: rgba(0, 0, 0, 0.12);
+    --input-focus-border: var(--accent-start);
+    --scrollbar-track: #e8eaf6;
+    --scrollbar-thumb: #b0b4d4;
+    --glass-bg: rgba(255, 255, 255, 0.6);
+    --glass-border: rgba(0, 0, 0, 0.08);
+}
+
+/* --------------------------------------------------------------------------
+   2. Global Reset & Body
+   -------------------------------------------------------------------------- */
+*, *::before, *::after {
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif;
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow-x: hidden;
+    transition: background-color var(--transition-base), color var(--transition-base);
+}
+
+/* --------------------------------------------------------------------------
+   3. Custom Scrollbar
+   -------------------------------------------------------------------------- */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+::-webkit-scrollbar-track {
+    background: var(--scrollbar-track);
+}
+::-webkit-scrollbar-thumb {
+    background: var(--scrollbar-thumb);
+    border-radius: var(--radius-full);
+}
+::-webkit-scrollbar-thumb:hover {
+    background: var(--accent-start);
+}
+
+/* --------------------------------------------------------------------------
+   4. Navbar (Glassmorphism)
+   -------------------------------------------------------------------------- */
+.glass-navbar {
+    background: var(--glass-bg);
+    backdrop-filter: blur(18px) saturate(1.6);
+    -webkit-backdrop-filter: blur(18px) saturate(1.6);
+    border-bottom: 1px solid var(--glass-border);
+    transition: background var(--transition-base);
+    z-index: 1050;
+}
+
+.brand-icon {
+    font-size: 1.5rem;
+    background: var(--accent-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    filter: drop-shadow(0 0 6px var(--accent-glow));
+    animation: pulse-glow 3s ease-in-out infinite;
+}
+
+.brand-text {
+    font-size: 1.2rem;
+    letter-spacing: 0.5px;
+}
+
+.text-accent {
+    background: var(--accent-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.navbar .nav-link {
+    color: var(--text-secondary);
+    font-weight: 500;
+    padding: 0.5rem 0.85rem;
+    border-radius: var(--radius-sm);
+    transition: color var(--transition-fast), background var(--transition-fast);
+}
+.navbar .nav-link:hover,
+.navbar .nav-link.active {
+    color: var(--text-primary);
+    background: rgba(102, 126, 234, 0.12);
+}
+
+.theme-toggle {
+    font-size: 1.15rem;
+    color: var(--text-secondary);
+    transition: transform var(--transition-fast), color var(--transition-fast);
+}
+.theme-toggle:hover {
+    color: var(--accent-start);
+    transform: rotate(25deg) scale(1.15);
+}
+
+.btn-outline-accent {
+    color: var(--accent-start);
+    border-color: var(--accent-start);
+}
+.btn-outline-accent:hover {
+    background: var(--accent-gradient);
+    border-color: transparent;
+    color: #fff;
+}
+.btn-accent {
+    background: var(--accent-gradient);
+    border: none;
+    color: #fff;
+}
+.btn-accent:hover {
+    filter: brightness(1.12);
+    color: #fff;
+    box-shadow: 0 4px 20px var(--accent-glow);
+}
+
+.glass-dropdown {
+    background: var(--glass-bg);
+    backdrop-filter: blur(18px);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-md);
+}
+.glass-dropdown .dropdown-item {
+    color: var(--text-primary);
+    border-radius: var(--radius-sm);
+}
+.glass-dropdown .dropdown-item:hover {
+    background: rgba(102, 126, 234, 0.15);
+}
+
+/* --------------------------------------------------------------------------
+   5. Flash / Alert Messages
+   -------------------------------------------------------------------------- */
+.flash-alert {
+    border: none;
+    border-radius: var(--radius-md);
+    backdrop-filter: blur(10px);
+    animation: slideDown 0.4s ease;
+}
+
+@keyframes slideDown {
+    from { opacity: 0; transform: translateY(-16px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* --------------------------------------------------------------------------
+   6. Main Content
+   -------------------------------------------------------------------------- */
+.main-content {
+    flex: 1;
+    padding: 1.5rem 0;
+}
+
+/* --------------------------------------------------------------------------
+   7. Glassmorphism Cards
+   -------------------------------------------------------------------------- */
+.glass-card {
+    background: var(--bg-card);
+    backdrop-filter: blur(16px) saturate(1.4);
+    -webkit-backdrop-filter: blur(16px) saturate(1.4);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-md);
+    transition: transform var(--transition-base), box-shadow var(--transition-base),
+                background var(--transition-base);
+}
+.glass-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg);
+    background: var(--bg-card-hover);
+}
+
+.glass-card-static {
+    background: var(--bg-card);
+    backdrop-filter: blur(16px) saturate(1.4);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-md);
+}
+
+/* --------------------------------------------------------------------------
+   8. Stat Cards
+   -------------------------------------------------------------------------- */
+.stat-card {
+    position: relative;
+    overflow: hidden;
+    padding: 1.5rem;
+}
+.stat-card .stat-icon {
+    font-size: 2.5rem;
+    background: var(--accent-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    opacity: 0.8;
+}
+.stat-card .stat-value {
+    font-size: 2rem;
+    font-weight: 700;
+    line-height: 1.1;
+}
+.stat-card .stat-label {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+.stat-card::after {
+    content: '';
+    position: absolute;
+    top: -40%;
+    right: -20%;
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background: var(--accent-gradient);
+    opacity: 0.06;
+    transition: transform var(--transition-slow);
+}
+.stat-card:hover::after {
+    transform: scale(1.5);
+}
+
+/* --------------------------------------------------------------------------
+   9. Hero / Gradient Sections
+   -------------------------------------------------------------------------- */
+.hero-section {
+    background: var(--accent-gradient);
+    border-radius: var(--radius-lg);
+    padding: 3rem 2rem;
+    position: relative;
+    overflow: hidden;
+    color: #fff;
+}
+.hero-section::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    animation: bgScroll 30s linear infinite;
+}
+@keyframes bgScroll {
+    to { background-position: 600px 600px; }
+}
+
+.hero-section h1,
+.hero-section h2 {
+    position: relative;
+    z-index: 1;
+}
+
+/* Landing page animated gradient */
+.gradient-bg-animated {
+    background: linear-gradient(-45deg, #0a0e27, #1a1f4a, #2d1b69, #0a0e27);
+    background-size: 400% 400%;
+    animation: gradientMove 15s ease infinite;
+}
+@keyframes gradientMove {
+    0%   { background-position: 0% 50%; }
+    50%  { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+/* --------------------------------------------------------------------------
+   10. Sentiment Badges & Colors
+   -------------------------------------------------------------------------- */
+.sentiment-positive {
+    color: var(--color-positive) !important;
+}
+.sentiment-negative {
+    color: var(--color-negative) !important;
+}
+.sentiment-neutral {
+    color: var(--color-neutral) !important;
+}
+.sentiment-mixed {
+    color: var(--color-mixed) !important;
+}
+
+.badge-positive {
+    background: rgba(0, 200, 83, 0.15);
+    color: var(--color-positive);
+    border: 1px solid rgba(0, 200, 83, 0.3);
+}
+.badge-negative {
+    background: rgba(255, 23, 68, 0.15);
+    color: var(--color-negative);
+    border: 1px solid rgba(255, 23, 68, 0.3);
+}
+.badge-neutral {
+    background: rgba(255, 196, 0, 0.15);
+    color: var(--color-neutral);
+    border: 1px solid rgba(255, 196, 0, 0.3);
+}
+.badge-mixed {
+    background: rgba(41, 182, 246, 0.15);
+    color: var(--color-mixed);
+    border: 1px solid rgba(41, 182, 246, 0.3);
+}
+
+.sentiment-badge-lg {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1.25rem;
+    font-weight: 600;
+    padding: 0.6rem 1.5rem;
+    border-radius: var(--radius-full);
+    animation: badgePop 0.4s ease;
+}
+@keyframes badgePop {
+    0%   { transform: scale(0.7); opacity: 0; }
+    70%  { transform: scale(1.08); }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+/* --------------------------------------------------------------------------
+   11. Form Inputs
+   -------------------------------------------------------------------------- */
+.form-control-glass,
+.form-select-glass {
+    background: var(--input-bg);
+    border: 1px solid var(--input-border);
+    color: var(--text-primary);
+    border-radius: var(--radius-sm);
+    transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+.form-control-glass:focus,
+.form-select-glass:focus {
+    background: var(--input-bg);
+    border-color: var(--input-focus-border);
+    color: var(--text-primary);
+    box-shadow: 0 0 0 3px var(--accent-glow);
+    outline: none;
+}
+.form-control-glass::placeholder {
+    color: var(--text-muted);
+}
+
+.char-counter {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    text-align: right;
+}
+
+/* --------------------------------------------------------------------------
+   12. Tables
+   -------------------------------------------------------------------------- */
+.table-glass {
+    --bs-table-bg: transparent;
+    --bs-table-color: var(--text-primary);
+    border-collapse: separate;
+    border-spacing: 0 0.35rem;
+}
+.table-glass thead th {
+    background: var(--bg-tertiary);
+    border: none;
+    color: var(--text-secondary);
+    font-weight: 600;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    padding: 0.75rem 1rem;
+}
+.table-glass thead th:first-child { border-radius: var(--radius-sm) 0 0 var(--radius-sm); }
+.table-glass thead th:last-child  { border-radius: 0 var(--radius-sm) var(--radius-sm) 0; }
+
+.table-glass tbody tr {
+    background: var(--bg-card);
+    transition: background var(--transition-fast), transform var(--transition-fast);
+}
+.table-glass tbody tr:hover {
+    background: var(--bg-card-hover);
+    transform: scale(1.005);
+}
+.table-glass tbody td {
+    padding: 0.85rem 1rem;
+    border: none;
+    vertical-align: middle;
+}
+.table-glass tbody td:first-child { border-radius: var(--radius-sm) 0 0 var(--radius-sm); }
+.table-glass tbody td:last-child  { border-radius: 0 var(--radius-sm) var(--radius-sm) 0; }
+
+/* --------------------------------------------------------------------------
+   13. Pagination
+   -------------------------------------------------------------------------- */
+.pagination-glass .page-link {
+    background: var(--bg-card);
+    border: 1px solid var(--glass-border);
+    color: var(--text-secondary);
+    border-radius: var(--radius-sm);
+    margin: 0 2px;
+    transition: all var(--transition-fast);
+}
+.pagination-glass .page-link:hover {
+    background: var(--accent-gradient);
+    border-color: transparent;
+    color: #fff;
+}
+.pagination-glass .page-item.active .page-link {
+    background: var(--accent-gradient);
+    border-color: transparent;
+    color: #fff;
+}
+
+/* --------------------------------------------------------------------------
+   14. Loading Overlay & Spinner
+   -------------------------------------------------------------------------- */
+.loading-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(10, 14, 39, 0.85);
+    backdrop-filter: blur(6px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    flex-direction: column;
+}
+
+.spinner-ring {
+    width: 56px;
+    height: 56px;
+    border: 4px solid rgba(102, 126, 234, 0.15);
+    border-top-color: var(--accent-start);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.btn-loading .spinner-border {
+    width: 1rem;
+    height: 1rem;
+    border-width: 2px;
+}
+
+/* --------------------------------------------------------------------------
+   15. Progress Bars
+   -------------------------------------------------------------------------- */
+.progress-glass {
+    background: var(--bg-tertiary);
+    border-radius: var(--radius-full);
+    height: 0.6rem;
+    overflow: hidden;
+}
+.progress-glass .progress-bar {
+    border-radius: var(--radius-full);
+    transition: width 0.8s ease;
+}
+.progress-bar-gradient {
+    background: var(--accent-gradient);
+}
+.progress-bar-positive { background: var(--color-positive); }
+.progress-bar-negative { background: var(--color-negative); }
+.progress-bar-neutral  { background: var(--color-neutral); }
+
+.confidence-meter {
+    height: 1.2rem;
+    border-radius: var(--radius-full);
+    background: var(--bg-tertiary);
+    overflow: hidden;
+    position: relative;
+}
+.confidence-meter .fill {
+    height: 100%;
+    border-radius: var(--radius-full);
+    background: var(--accent-gradient);
+    transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+}
+.confidence-meter .fill::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    animation: shimmer 2s ease infinite;
+}
+@keyframes shimmer {
+    0%   { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+}
+
+/* --------------------------------------------------------------------------
+   16. Drag-and-Drop Zone
+   -------------------------------------------------------------------------- */
+.drop-zone {
+    border: 2px dashed var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: 3rem 2rem;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color var(--transition-fast), background var(--transition-fast);
+    background: var(--bg-card);
+}
+.drop-zone:hover,
+.drop-zone.drag-over {
+    border-color: var(--accent-start);
+    background: rgba(102, 126, 234, 0.06);
+}
+.drop-zone.drag-over {
+    box-shadow: inset 0 0 30px rgba(102, 126, 234, 0.1);
+}
+.drop-zone-icon {
+    font-size: 3rem;
+    background: var(--accent-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 1rem;
+}
+
+/* --------------------------------------------------------------------------
+   17. Camera Feed & Overlay
+   -------------------------------------------------------------------------- */
+.camera-container {
+    position: relative;
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    background: #000;
+    aspect-ratio: 4/3;
+    max-height: 500px;
+}
+.camera-container video,
+.camera-container canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+.camera-container canvas {
+    z-index: 2;
+    pointer-events: none;
+}
+
+.emotion-bar-label {
+    font-size: 0.82rem;
+    min-width: 80px;
+    font-weight: 500;
+}
+
+.emotion-emoji {
+    font-size: 3.5rem;
+    animation: emojiBounce 0.5s ease;
+}
+@keyframes emojiBounce {
+    0%   { transform: scale(0.5) rotate(-10deg); }
+    60%  { transform: scale(1.15) rotate(5deg); }
+    100% { transform: scale(1) rotate(0); }
+}
+
+/* --------------------------------------------------------------------------
+   18. Toast Notifications
+   -------------------------------------------------------------------------- */
+.toast-custom {
+    background: var(--glass-bg);
+    backdrop-filter: blur(16px);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-md);
+    color: var(--text-primary);
+    box-shadow: var(--shadow-md);
+    min-width: 280px;
+    animation: toastSlideIn 0.4s ease;
+}
+.toast-custom.toast-success { border-left: 4px solid var(--color-positive); }
+.toast-custom.toast-error   { border-left: 4px solid var(--color-negative); }
+.toast-custom.toast-warning { border-left: 4px solid var(--color-neutral); }
+.toast-custom.toast-info    { border-left: 4px solid var(--accent-start); }
+
+@keyframes toastSlideIn {
+    from { opacity: 0; transform: translateX(100%); }
+    to   { opacity: 1; transform: translateX(0); }
+}
+
+/* --------------------------------------------------------------------------
+   19. API Docs Styles
+   -------------------------------------------------------------------------- */
+.method-badge {
+    display: inline-block;
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 0.25rem 0.75rem;
+    border-radius: var(--radius-sm);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    min-width: 56px;
+    text-align: center;
+}
+.method-get    { background: rgba(0, 200, 83, 0.15); color: var(--color-positive); }
+.method-post   { background: rgba(102, 126, 234, 0.15); color: var(--accent-start); }
+.method-delete { background: rgba(255, 23, 68, 0.15); color: var(--color-negative); }
+.method-put    { background: rgba(255, 196, 0, 0.15); color: var(--color-neutral); }
+
+.endpoint-card {
+    border-left: 3px solid var(--accent-start);
+}
+.endpoint-card pre {
+    background: var(--bg-primary);
+    border-radius: var(--radius-sm);
+    padding: 1rem;
+    font-size: 0.85rem;
+    overflow-x: auto;
+    color: var(--text-secondary);
+}
+
+.copy-btn {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    background: var(--bg-tertiary);
+    border: 1px solid var(--glass-border);
+    color: var(--text-secondary);
+    border-radius: var(--radius-sm);
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+.copy-btn:hover {
+    background: var(--accent-start);
+    color: #fff;
+}
+
+/* --------------------------------------------------------------------------
+   20. Auth Pages (Login / Register)
+   -------------------------------------------------------------------------- */
+.auth-wrapper {
+    min-height: calc(100vh - 120px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 1rem;
+}
+.auth-card {
+    width: 100%;
+    max-width: 440px;
+    padding: 2.5rem;
+}
+
+.password-strength-bar {
+    height: 4px;
+    border-radius: var(--radius-full);
+    background: var(--bg-tertiary);
+    overflow: hidden;
+    margin-top: 0.35rem;
+}
+.password-strength-bar .fill {
+    height: 100%;
+    border-radius: var(--radius-full);
+    transition: width var(--transition-base), background var(--transition-base);
+}
+.strength-weak   { width: 25%; background: var(--color-negative); }
+.strength-fair   { width: 50%; background: var(--color-neutral); }
+.strength-good   { width: 75%; background: var(--color-mixed); }
+.strength-strong { width: 100%; background: var(--color-positive); }
+
+/* --------------------------------------------------------------------------
+   21. Keyword Tags
+   -------------------------------------------------------------------------- */
+.keyword-tag {
+    display: inline-block;
+    background: rgba(102, 126, 234, 0.12);
+    color: var(--accent-start);
+    padding: 0.3rem 0.75rem;
+    border-radius: var(--radius-full);
+    font-size: 0.82rem;
+    font-weight: 500;
+    margin: 0.2rem;
+    border: 1px solid rgba(102, 126, 234, 0.2);
+    transition: all var(--transition-fast);
+}
+.keyword-tag:hover {
+    background: var(--accent-gradient);
+    color: #fff;
+    border-color: transparent;
+}
+
+/* --------------------------------------------------------------------------
+   22. Quick Action Buttons
+   -------------------------------------------------------------------------- */
+.quick-action-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem 1.25rem;
+    border-radius: var(--radius-md);
+    font-weight: 500;
+    transition: all var(--transition-base);
+}
+.quick-action-btn i {
+    font-size: 1.2rem;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-sm);
+    background: var(--accent-gradient);
+    color: #fff;
+}
+.quick-action-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+/* --------------------------------------------------------------------------
+   23. Feature Cards (Landing Page)
+   -------------------------------------------------------------------------- */
+.feature-card {
+    text-align: center;
+    padding: 2rem 1.5rem;
+}
+.feature-card .feature-icon {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.8rem;
+    margin-bottom: 1.25rem;
+    background: var(--accent-gradient);
+    color: #fff;
+    box-shadow: 0 8px 24px var(--accent-glow);
+}
+.feature-card h5 {
+    font-weight: 600;
+    margin-bottom: 0.75rem;
+}
+.feature-card p {
+    color: var(--text-secondary);
+    font-size: 0.92rem;
+}
+
+/* How it works steps */
+.step-number {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    font-weight: 700;
+    background: var(--accent-gradient);
+    color: #fff;
+    flex-shrink: 0;
+}
+
+/* --------------------------------------------------------------------------
+   24. Report / Detail Page
+   -------------------------------------------------------------------------- */
+.gauge-container {
+    width: 160px;
+    height: 100px;
+    position: relative;
+    margin: 0 auto;
+}
+
+.report-section {
+    border-left: 3px solid var(--accent-start);
+    padding-left: 1.25rem;
+    margin-bottom: 1.5rem;
+}
+
+/* --------------------------------------------------------------------------
+   25. Snapshot Gallery
+   -------------------------------------------------------------------------- */
+.snapshot-gallery {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 0.75rem;
+}
+.snapshot-item {
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    position: relative;
+    cursor: pointer;
+    aspect-ratio: 1;
+}
+.snapshot-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform var(--transition-base);
+}
+.snapshot-item:hover img {
+    transform: scale(1.05);
+}
+.snapshot-item .snapshot-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 0.4rem;
+    background: linear-gradient(transparent, rgba(0,0,0,0.7));
+    font-size: 0.75rem;
+    color: #fff;
+}
+
+/* --------------------------------------------------------------------------
+   26. Animations
+   -------------------------------------------------------------------------- */
+@keyframes pulse-glow {
+    0%, 100% { filter: drop-shadow(0 0 6px var(--accent-glow)); }
+    50%      { filter: drop-shadow(0 0 14px var(--accent-glow)); }
+}
+
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+.fade-in-up {
+    animation: fadeInUp 0.5s ease forwards;
+}
+
+@keyframes countUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+.stagger-1 { animation-delay: 0.05s; }
+.stagger-2 { animation-delay: 0.10s; }
+.stagger-3 { animation-delay: 0.15s; }
+.stagger-4 { animation-delay: 0.20s; }
+
+/* --------------------------------------------------------------------------
+   27. Footer
+   -------------------------------------------------------------------------- */
+.site-footer {
+    background: var(--bg-secondary);
+    border-top: 1px solid var(--border-color);
+    font-size: 0.88rem;
+}
+
+/* --------------------------------------------------------------------------
+   28. Responsive Breakpoints
+   -------------------------------------------------------------------------- */
+@media (max-width: 991.98px) {
+    .hero-section {
+        padding: 2rem 1.25rem;
+    }
+    .stat-card .stat-value {
+        font-size: 1.6rem;
+    }
+}
+
+@media (max-width: 767.98px) {
+    .hero-section h1 {
+        font-size: 1.6rem;
+    }
+    .stat-card {
+        padding: 1rem;
+    }
+    .stat-card .stat-icon {
+        font-size: 2rem;
+    }
+    .auth-card {
+        padding: 1.5rem;
+    }
+    .camera-container {
+        aspect-ratio: unset;
+        height: 300px;
+    }
+}
+
+@media (max-width: 575.98px) {
+    .brand-text { font-size: 1rem; }
+    .sentiment-badge-lg { font-size: 1rem; padding: 0.4rem 1rem; }
+    .feature-card { padding: 1.5rem 1rem; }
+}
+
+/* --------------------------------------------------------------------------
+   29. Print Styles (Reports)
+   -------------------------------------------------------------------------- */
+@media print {
+    body {
+        background: #fff !important;
+        color: #000 !important;
+    }
+    .glass-navbar,
+    .site-footer,
+    .theme-toggle,
+    #toast-container,
+    .loading-overlay,
+    .btn,
+    .no-print {
+        display: none !important;
+    }
+    .glass-card,
+    .glass-card-static {
+        background: #fff !important;
+        border: 1px solid #ddd !important;
+        box-shadow: none !important;
+        backdrop-filter: none !important;
+    }
+    .hero-section {
+        background: #f0f0f0 !important;
+        color: #000 !important;
+    }
+    a[href]::after {
+        content: " (" attr(href) ")";
+        font-size: 0.8em;
+        color: #666;
+    }
+}
+
+/* --------------------------------------------------------------------------
+   30. Utility helpers
+   -------------------------------------------------------------------------- */
+.text-gradient {
+    background: var(--accent-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.bg-gradient-accent {
+    background: var(--accent-gradient);
+}
+
+.border-accent {
+    border-color: var(--accent-start) !important;
+}
+
+.hover-lift {
+    transition: transform var(--transition-base), box-shadow var(--transition-base);
+}
+.hover-lift:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-md);
+}
+
+.truncate {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.gap-card { gap: 1.5rem; }

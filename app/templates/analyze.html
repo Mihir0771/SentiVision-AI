@@ -1,0 +1,269 @@
+{% extends "base.html" %}
+
+{% block title %}Text Sentiment Analysis — SentiVision AI{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-lg-4 py-4">
+
+    <!-- Header Section -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold mb-1"><i class="fas fa-comment-dots text-accent me-2"></i>Text Sentiment Analysis</h2>
+            <p class="text-secondary mb-0">Multi-model NLP engine combining HuggingFace RoBERTa, VADER, and TextBlob</p>
+        </div>
+        <div class="d-flex gap-2 mt-2 mt-md-0">
+            <a href="{{ url_for('batch.index') }}" class="btn btn-outline-secondary btn-sm">
+                <i class="fas fa-file-upload me-1"></i>Bulk File Upload
+            </a>
+            <a href="{{ url_for('analysis.history') }}" class="btn btn-outline-accent btn-sm">
+                <i class="fas fa-history me-1"></i>History
+            </a>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Input Column -->
+        <div class="col-lg-7">
+            <div class="card border-0 rounded-4 shadow-sm p-4 mb-4">
+                <ul class="nav nav-pills mb-3" id="analysisTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="text-tab" data-bs-toggle="pill" data-bs-target="#tab-text" type="button" role="tab">
+                            <i class="fas fa-align-left me-1"></i> Direct Text
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="url-tab" data-bs-toggle="pill" data-bs-target="#tab-url" type="button" role="tab">
+                            <i class="fas fa-globe me-1"></i> URL Webpage Scraper
+                        </button>
+                    </li>
+                </ul>
+
+                <div class="tab-content" id="analysisTabContent">
+                    <!-- Tab 1: Direct Text -->
+                    <div class="tab-pane fade show active" id="tab-text" role="tabpanel">
+                        <!-- Sample Buttons -->
+                        <div class="d-flex flex-wrap gap-2 align-items-center mb-2">
+                            <span class="small text-secondary fw-semibold">Quick Samples:</span>
+                            <button class="btn btn-xs btn-outline-success sample-btn" data-sample="positive">Positive Review</button>
+                            <button class="btn btn-xs btn-outline-danger sample-btn" data-sample="negative">Negative Tweet</button>
+                            <button class="btn btn-xs btn-outline-warning sample-btn" data-sample="neutral">Neutral Info</button>
+                            <button class="btn btn-xs btn-outline-info sample-btn" data-sample="social">Social Media</button>
+                        </div>
+
+                        <form id="textAnalysisForm">
+                            <div class="mb-3 position-relative">
+                                <textarea class="form-control rounded-3 p-3" id="analysisInput" rows="6"
+                                          placeholder="Type, paste product reviews, tweets, customer feedback, or articles here to analyze sentiment…"></textarea>
+                                <div class="d-flex justify-content-between text-muted small mt-1 px-1">
+                                    <span>Characters: <strong id="charCount">0</strong> | Words: <strong id="wordCount">0</strong></span>
+                                    <span>Supports 50+ languages</span>
+                                </div>
+                            </div>
+
+                            <!-- Model Selector Checkboxes -->
+                            <div class="card bg-dark-subtle border-0 rounded-3 p-3 mb-3">
+                                <span class="small fw-semibold text-uppercase text-secondary mb-2 d-block">Enabled AI Models</span>
+                                <div class="row g-2">
+                                    <div class="col-md-4">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="modelTransformer" checked>
+                                            <label class="form-check-label small fw-semibold" for="modelTransformer">
+                                                RoBERTa (Deep Learning)
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="modelVader" checked>
+                                            <label class="form-check-label small fw-semibold" for="modelVader">
+                                                VADER (Social Media)
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="modelTextBlob" checked>
+                                            <label class="form-check-label small fw-semibold" for="modelTextBlob">
+                                                TextBlob (Polarity)
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <button type="submit" class="btn btn-accent px-4 py-2 w-100" id="btnSubmitAnalysis">
+                                <i class="fas fa-magic me-2"></i>Analyze Sentiment
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Tab 2: URL Scraper -->
+                    <div class="tab-pane fade" id="tab-url" role="tabpanel">
+                        <form id="urlAnalysisForm">
+                            <p class="text-secondary small mb-3">
+                                Provide any public webpage or product review URL (e.g. Amazon product, Reddit thread, blog article) to extract reviews and run sentiment scoring.
+                            </p>
+                            <div class="input-group mb-3">
+                                <span class="input-group-text"><i class="fas fa-link"></i></span>
+                                <input type="url" class="form-control" id="urlInput" placeholder="https://example.com/product/reviews">
+                                <button type="submit" class="btn btn-accent px-4">
+                                    <i class="fas fa-search me-1"></i> Scrape &amp; Analyze
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Explanation Column -->
+        <div class="col-lg-5">
+            <div class="card border-0 rounded-4 shadow-sm p-4 mb-4">
+                <h5 class="fw-bold mb-3"><i class="fas fa-microchip text-accent me-2"></i>How The Engine Works</h5>
+                <div class="d-flex gap-3 mb-3">
+                    <div class="fs-4 text-primary"><i class="fas fa-network-wired"></i></div>
+                    <div>
+                        <h6 class="fw-bold mb-1">RoBERTa Transformer</h6>
+                        <p class="text-secondary small mb-0">Trained on over 124 million social media posts. Excels at context, nuance, and informal slang.</p>
+                    </div>
+                </div>
+                <div class="d-flex gap-3 mb-3">
+                    <div class="fs-4 text-success"><i class="fas fa-spell-check"></i></div>
+                    <div>
+                        <h6 class="fw-bold mb-1">VADER Lexicon</h6>
+                        <p class="text-secondary small mb-0">Rule-based scoring sensitive to punctuation, emoticons, capitalization, and intensity modifiers.</p>
+                    </div>
+                </div>
+                <div class="d-flex gap-3">
+                    <div class="fs-4 text-warning"><i class="fas fa-compass"></i></div>
+                    <div>
+                        <h6 class="fw-bold mb-1">TextBlob Subjectivity</h6>
+                        <p class="text-secondary small mb-0">Computes sentiment polarity alongside objectivity vs subjectivity metrics.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Results Section (Dynamic) -->
+    <div id="resultsSection" class="d-none">
+        <hr class="my-4 border-secondary opacity-25">
+
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h3 class="fw-bold mb-0"><i class="fas fa-poll text-accent me-2"></i>Analysis Results</h3>
+            <div class="d-flex gap-2">
+                <button class="btn btn-outline-secondary btn-sm" onclick="window.copyToClipboard(JSON.stringify(window.lastAnalysisResult || {}))">
+                    <i class="fas fa-copy me-1"></i>Copy Output
+                </button>
+                <a href="#" id="btnViewFullReport" class="btn btn-accent btn-sm d-none">
+                    <i class="fas fa-file-pdf me-1"></i>Detailed Report
+                </a>
+            </div>
+        </div>
+
+        <div class="row g-4 mb-4">
+            <!-- Overall Result Badge & Gauge -->
+            <div class="col-md-6 col-xl-4">
+                <div class="card border-0 rounded-4 shadow-sm p-4 h-100 text-center">
+                    <span class="text-secondary small fw-semibold text-uppercase mb-2">Overall Sentiment</span>
+                    <div class="my-3">
+                        <span id="overallSentimentBadge" class="badge p-3 fs-5 text-uppercase">
+                            <i class="fas fa-spinner fa-spin me-2"></i>Calculating…
+                        </span>
+                    </div>
+                    <div class="mt-2 text-start">
+                        <div class="d-flex justify-content-between small text-secondary mb-1">
+                            <span>Ensemble Confidence</span>
+                            <span id="confidenceMeterText" class="fw-bold">0%</span>
+                        </div>
+                        <div class="progress rounded-pill" style="height: 10px;">
+                            <div id="confidenceMeterBar" class="progress-bar progress-bar-striped progress-bar-animated" style="width: 0%;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Model Comparison Breakdown -->
+            <div class="col-md-6 col-xl-4">
+                <div class="card border-0 rounded-4 shadow-sm p-4 h-100">
+                    <span class="text-secondary small fw-semibold text-uppercase mb-3">Model Consensus</span>
+                    <div class="d-flex flex-column gap-2">
+                        <div class="p-2 rounded bg-dark-subtle border" id="modelCard_roberta">
+                            <div class="small fw-semibold">RoBERTa Transformer</div>
+                            <div class="text-muted small">Loading…</div>
+                        </div>
+                        <div class="p-2 rounded bg-dark-subtle border" id="modelCard_vader">
+                            <div class="small fw-semibold">VADER Rule-Based</div>
+                            <div class="text-muted small">Loading…</div>
+                        </div>
+                        <div class="p-2 rounded bg-dark-subtle border" id="modelCard_textblob">
+                            <div class="small fw-semibold">TextBlob Polarity</div>
+                            <div class="text-muted small">Loading…</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Ensemble Probability Distribution -->
+            <div class="col-xl-4">
+                <div class="card border-0 rounded-4 shadow-sm p-4 h-100">
+                    <span class="text-secondary small fw-semibold text-uppercase mb-2">Sentiment Probability</span>
+                    <div class="chart-container position-relative" style="height: 180px;">
+                        <canvas id="ensembleScoresChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Keywords & Entities Row -->
+        <div class="row g-4">
+            <div class="col-lg-6">
+                <div class="card border-0 rounded-4 shadow-sm p-4 h-100">
+                    <h6 class="fw-bold mb-3"><i class="fas fa-tags text-accent me-2"></i>Extracted Key Phrases</h6>
+                    <div id="keywordsContainer" class="d-flex flex-wrap">
+                        <span class="text-muted small">Keywords will appear here.</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-3">
+                <div class="card border-0 rounded-4 shadow-sm p-4 h-100">
+                    <h6 class="fw-bold mb-3"><i class="fas fa-id-badge text-accent me-2"></i>Named Entities</h6>
+                    <div id="entitiesContainer" class="d-flex flex-wrap">
+                        <span class="text-muted small">Entities will appear here.</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-3">
+                <div class="card border-0 rounded-4 shadow-sm p-4 h-100">
+                    <h6 class="fw-bold mb-3"><i class="fas fa-info-circle text-accent me-2"></i>Text Statistics</h6>
+                    <ul class="list-unstyled mb-0 small">
+                        <li class="d-flex justify-content-between py-1 border-bottom">
+                            <span class="text-secondary">Word Count:</span>
+                            <strong id="statWordCount">0</strong>
+                        </li>
+                        <li class="d-flex justify-content-between py-1 border-bottom">
+                            <span class="text-secondary">Sentences:</span>
+                            <strong id="statSentenceCount">0</strong>
+                        </li>
+                        <li class="d-flex justify-content-between py-1 border-bottom">
+                            <span class="text-secondary">Reading Time:</span>
+                            <strong id="statReadingTime">0s</strong>
+                        </li>
+                        <li class="d-flex justify-content-between py-1">
+                            <span class="text-secondary">Language:</span>
+                            <strong id="statDetectedLang">EN</strong>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/analyzer.js') }}"></script>
+{% endblock %}

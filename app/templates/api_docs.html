@@ -1,0 +1,163 @@
+{% extends "base.html" %}
+
+{% block title %}REST API Documentation — SentiVision AI{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-lg-4 py-4">
+
+    <!-- Header -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold mb-1"><i class="fas fa-code text-accent me-2"></i>Developer REST API Reference</h2>
+            <p class="text-secondary mb-0">Programmatic endpoints for text sentiment scoring, facial emotion recognition, and batch jobs</p>
+        </div>
+        <div>
+            <span class="badge bg-accent-soft text-accent px-3 py-2 rounded-pill fw-semibold">Version 1.0 (v1)</span>
+        </div>
+    </div>
+
+    <!-- API Overview Card -->
+    <div class="card border-0 rounded-4 shadow-sm p-4 mb-4">
+        <h5 class="fw-bold mb-2">Open API &amp; Base URL</h5>
+        <p class="text-secondary small mb-3">
+            All API requests should be sent to the base URL: <code>http://localhost:5000/api/v1</code>.
+            As an open-source platform, all endpoints are publicly accessible with no mandatory API key or token required!
+        </p>
+        <div class="d-flex flex-wrap gap-2">
+            <span class="badge bg-success-subtle text-success border border-success-subtle p-2"><i class="fas fa-lock-open me-1"></i>100% Free &amp; Open Access</span>
+            <span class="badge bg-dark border text-light p-2"><i class="fas fa-file-code me-1 text-success"></i>JSON Responses</span>
+            <span class="badge bg-dark border text-light p-2"><i class="fas fa-bolt me-1 text-warning"></i>Sub-50ms Latency</span>
+        </div>
+    </div>
+
+    <!-- Endpoints List -->
+    <div class="d-flex flex-column gap-4">
+
+        <!-- Endpoint: Auth Token -->
+        <div class="card border-0 rounded-4 shadow-sm p-4">
+            <div class="d-flex align-items-center gap-2 mb-2">
+                <span class="badge bg-success fw-bold">POST</span>
+                <code class="fs-6 text-light">/api/v1/auth/token</code>
+            </div>
+            <p class="text-secondary small mb-3">Generate a JSON Web Token (JWT) valid for 24 hours.</p>
+
+            <h6 class="small fw-bold text-uppercase text-secondary">Request Body (JSON):</h6>
+            <pre class="bg-black text-light p-3 rounded-3 small mb-3"><code>{
+  "username": "demo_user",
+  "password": "your_secure_password"
+}</code></pre>
+
+            <h6 class="small fw-bold text-uppercase text-secondary">cURL Example:</h6>
+            <div class="position-relative">
+                <pre class="bg-black text-light p-3 rounded-3 small mb-0"><code>curl -X POST http://localhost:5000/api/v1/auth/token \
+  -H "Content-Type: application/json" \
+  -d '{"username":"demo_user", "password":"password123"}'</code></pre>
+                <button class="btn btn-xs btn-outline-secondary position-absolute top-0 end-0 m-2"
+                        onclick="window.copyToClipboard('curl -X POST http://localhost:5000/api/v1/auth/token -H \'Content-Type: application/json\' -d \'{\&quot;username\&quot;:\&quot;demo_user\&quot;, \&quot;password\&quot;:\&quot;password123\&quot;}\'')">
+                    Copy
+                </button>
+            </div>
+        </div>
+
+        <!-- Endpoint: Analyze Text -->
+        <div class="card border-0 rounded-4 shadow-sm p-4">
+            <div class="d-flex align-items-center gap-2 mb-2">
+                <span class="badge bg-success fw-bold">POST</span>
+                <code class="fs-6 text-light">/api/v1/analyze/text</code>
+            </div>
+            <p class="text-secondary small mb-3">Execute multi-model sentiment analysis with RoBERTa, VADER, and TextBlob.</p>
+
+            <h6 class="small fw-bold text-uppercase text-secondary">Request Body (JSON):</h6>
+            <pre class="bg-black text-light p-3 rounded-3 small mb-3"><code>{
+  "text": "The battery performance is phenomenal, but the charging speed could be improved.",
+  "models": ["transformer", "vader", "textblob"]
+}</code></pre>
+
+            <h6 class="small fw-bold text-uppercase text-secondary">Response (200 OK):</h6>
+            <pre class="bg-black text-light p-3 rounded-3 small mb-3"><code>{
+  "status": "success",
+  "data": {
+    "sentiment": {
+      "overall_sentiment": "positive",
+      "overall_confidence": 0.88,
+      "ensemble_scores": { "positive": 0.72, "neutral": 0.20, "negative": 0.08 },
+      "models": {
+        "transformer": { "label": "positive", "confidence": 0.91 },
+        "vader": { "compound": 0.63, "label": "positive" },
+        "textblob": { "polarity": 0.45, "subjectivity": 0.60, "label": "positive" }
+      }
+    },
+    "keywords": [{ "keyword": "battery performance", "score": 4.5 }],
+    "language": { "language": "en", "confidence": 0.99 }
+  }
+}</code></pre>
+
+            <h6 class="small fw-bold text-uppercase text-secondary">cURL Example:</h6>
+            <div class="position-relative">
+                <pre class="bg-black text-light p-3 rounded-3 small mb-0"><code>curl -X POST http://localhost:5000/api/v1/analyze/text \
+  -H "Content-Type: application/json" \
+  -d '{"text": "Incredible camera quality and battery life!"}'</code></pre>
+                <button class="btn btn-xs btn-outline-secondary position-absolute top-0 end-0 m-2"
+                        onclick="window.copyToClipboard('curl -X POST http://localhost:5000/api/v1/analyze/text -H \'Content-Type: application/json\' -d \'{\&quot;text\&quot;: \&quot;Incredible camera quality and battery life!\&quot;}\'')">
+                    Copy
+                </button>
+            </div>
+        </div>
+
+        <!-- Endpoint: Analyze Batch -->
+        <div class="card border-0 rounded-4 shadow-sm p-4">
+            <div class="d-flex align-items-center gap-2 mb-2">
+                <span class="badge bg-success fw-bold">POST</span>
+                <code class="fs-6 text-light">/api/v1/analyze/batch</code>
+            </div>
+            <p class="text-secondary small mb-3">Analyze an array of review or social media texts in bulk.</p>
+
+            <h6 class="small fw-bold text-uppercase text-secondary">Request Body (JSON):</h6>
+            <pre class="bg-black text-light p-3 rounded-3 small mb-3"><code>{
+  "texts": [
+    "Amazing product, highly recommend!",
+    "It broke after two days, terrible.",
+    "Package arrived on time."
+  ]
+}</code></pre>
+        </div>
+
+        <!-- Endpoint: Facial Emotion -->
+        <div class="card border-0 rounded-4 shadow-sm p-4">
+            <div class="d-flex align-items-center gap-2 mb-2">
+                <span class="badge bg-success fw-bold">POST</span>
+                <code class="fs-6 text-light">/api/v1/analyze/image</code>
+            </div>
+            <p class="text-secondary small mb-3">Detect faces and compute 7-emotion spectrum probabilities from a photo.</p>
+
+            <h6 class="small fw-bold text-uppercase text-secondary">cURL Example (Multipart):</h6>
+            <pre class="bg-black text-light p-3 rounded-3 small mb-0"><code>curl -X POST http://localhost:5000/api/v1/analyze/image \
+  -F "image=@face_photo.jpg"</code></pre>
+        </div>
+
+        <!-- Endpoint: List History -->
+        <div class="card border-0 rounded-4 shadow-sm p-4">
+            <div class="d-flex align-items-center gap-2 mb-2">
+                <span class="badge bg-primary fw-bold">GET</span>
+                <code class="fs-6 text-light">/api/v1/analyses</code>
+            </div>
+            <p class="text-secondary small mb-3">Retrieve historical sentiment and emotion records for authenticated account.</p>
+
+            <h6 class="small fw-bold text-uppercase text-secondary">cURL Example:</h6>
+            <pre class="bg-black text-light p-3 rounded-3 small mb-0"><code>curl -X GET "http://localhost:5000/api/v1/analyses?page=1&limit=20" \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN"</code></pre>
+        </div>
+
+        <!-- Endpoint: Usage Stats -->
+        <div class="card border-0 rounded-4 shadow-sm p-4">
+            <div class="d-flex align-items-center gap-2 mb-2">
+                <span class="badge bg-primary fw-bold">GET</span>
+                <code class="fs-6 text-light">/api/v1/stats</code>
+            </div>
+            <p class="text-secondary small mb-3">Get aggregate positive, negative, and neutral percentages and average confidence.</p>
+        </div>
+
+    </div>
+
+</div>
+{% endblock %}
