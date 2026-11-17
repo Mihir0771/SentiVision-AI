@@ -113,7 +113,13 @@ def main() -> None:
     if ssl_context:
         socketio_kwargs["ssl_context"] = ssl_context
 
-    socketio.run(app, **socketio_kwargs)
+    try:
+        socketio.run(app, **socketio_kwargs)
+    except (KeyboardInterrupt, SystemExit):
+        app.logger.info("Server stopped.")
+    except Exception as exc:
+        app.logger.error("Server encountered an unhandled exception: %s", exc, exc_info=True)
+        sys.exit(1)
 
 
 if __name__ == "__main__":
