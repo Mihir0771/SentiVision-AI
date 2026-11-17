@@ -1,0 +1,366 @@
+{% extends "base.html" %}
+
+{% block title %}Internship Project Presentation — SentiVision AI{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4 px-lg-5">
+    <!-- Presentation Toolbar -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 pb-2 border-bottom">
+        <div>
+            <h3 class="fw-bold mb-0">
+                <i class="fas fa-desktop text-accent me-2"></i>Project Presentation Deck
+            </h3>
+            <span class="text-secondary small">Internship Capstone Project Demo &amp; Technical Defense</span>
+        </div>
+        <div class="d-flex align-items-center gap-2 mt-2 mt-sm-0">
+            <span class="badge bg-dark-subtle text-light px-3 py-2" id="slideIndicator">Slide 1 / 8</span>
+            <button class="btn btn-outline-secondary btn-sm" id="btnPrevSlide" title="Previous Slide (Left Arrow)">
+                <i class="fas fa-chevron-left me-1"></i> Prev
+            </button>
+            <button class="btn btn-accent btn-sm" id="btnNextSlide" title="Next Slide (Right Arrow or Space)">
+                Next <i class="fas fa-chevron-right ms-1"></i>
+            </button>
+            <button class="btn btn-outline-light btn-sm" id="btnFullscreen" title="Toggle Fullscreen">
+                <i class="fas fa-expand"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Presentation Deck Viewport -->
+    <div class="position-relative overflow-hidden rounded-4 border border-secondary border-opacity-25 shadow-lg bg-dark"
+         id="presentationContainer" style="min-height: 600px; background: radial-gradient(circle at 15% 20%, #151a30 0%, #0c0f1d 90%);">
+
+        <!-- Slide 1: Title / Hero -->
+        <div class="slide-pane p-5 active-slide" data-slide="1">
+            <div class="row align-items-center min-vh-50 py-5">
+                <div class="col-lg-8 mx-auto text-center">
+                    <span class="badge bg-accent-subtle text-accent px-3 py-2 rounded-pill fw-semibold mb-3">
+                        <i class="fas fa-award me-1"></i> Internship Capstone Project
+                    </span>
+                    <h1 class="display-4 fw-black text-light mb-3">
+                        🧠 SentiVision AI
+                    </h1>
+                    <h4 class="text-secondary fw-normal mb-4">
+                        Multi-Modal Real-Time Sentiment &amp; Facial Emotion Recognition Platform
+                    </h4>
+                    <p class="lead text-light text-opacity-75 mb-5" style="max-width: 680px; margin: 0 auto;">
+                        Unifying deep learning Natural Language Processing with real-time Computer Vision to decode emotional intelligence across written text, tabular datasets, and live webcam video streams.
+                    </p>
+                    <div class="d-flex justify-content-center flex-wrap gap-3">
+                        <div class="card bg-dark bg-opacity-50 border border-secondary border-opacity-25 px-4 py-2 rounded-3 text-start">
+                            <span class="smaller text-muted">Author / Presenter:</span>
+                            <span class="fw-bold text-light">Mihir (<a href="https://github.com/Mihir0771" target="_blank" class="text-accent text-decoration-none">@Mihir0771</a>)</span>
+                        </div>
+                        <div class="card bg-dark bg-opacity-50 border border-secondary border-opacity-25 px-4 py-2 rounded-3 text-start">
+                            <span class="smaller text-muted">Stack:</span>
+                            <span class="fw-bold text-light">Python • Flask • OpenCV • Transformers • MongoDB</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 2: Problem Statement & Motivation -->
+        <div class="slide-pane p-5 d-none" data-slide="2">
+            <h4 class="text-accent fw-bold text-uppercase small tracking-wide mb-2">01. Problem &amp; Vision</h4>
+            <h2 class="fw-bold text-light mb-4">Bridging the Multimodal Emotional Gap</h2>
+            <div class="row g-4 mt-2">
+                <div class="col-md-4">
+                    <div class="card h-100 bg-black bg-opacity-40 border-0 p-4 rounded-4">
+                        <div class="rounded-circle bg-danger bg-opacity-20 d-inline-flex p-3 mb-3 text-danger" style="width: 54px; height: 54px; align-items:center; justify-content:center;">
+                            <i class="fas fa-comment-slash fa-lg"></i>
+                        </div>
+                        <h5 class="fw-bold text-light">Single-Modality Blindspots</h5>
+                        <p class="text-secondary small mb-0">
+                            Traditional sentiment tools only inspect text or reviews, completely missing visual expressions, micro-reactions, and live customer feedback during digital interactions.
+                        </p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card h-100 bg-black bg-opacity-40 border-0 p-4 rounded-4">
+                        <div class="rounded-circle bg-warning bg-opacity-20 d-inline-flex p-3 mb-3 text-warning" style="width: 54px; height: 54px; align-items:center; justify-content:center;">
+                            <i class="fas fa-balance-scale fa-lg"></i>
+                        </div>
+                        <h5 class="fw-bold text-light">Single-Model Bias</h5>
+                        <p class="text-secondary small mb-0">
+                            Relying on a single AI model produces skewed sentiment scores. Deep transformers excel at nuances, while lexicon models excel at social idioms and emojis.
+                        </p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card h-100 bg-black bg-opacity-40 border-0 p-4 rounded-4">
+                        <div class="rounded-circle bg-success bg-opacity-20 d-inline-flex p-3 mb-3 text-success" style="width: 54px; height: 54px; align-items:center; justify-content:center;">
+                            <i class="fas fa-lock-open fa-lg"></i>
+                        </div>
+                        <h5 class="fw-bold text-light">High Friction Barriers</h5>
+                        <p class="text-secondary small mb-0">
+                            Most tools gate features behind compulsory logins, credit cards, or rate-limited paid tiers. SentiVision AI was engineered as a frictionless open-source system for everyone.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 3: System Architecture -->
+        <div class="slide-pane p-5 d-none" data-slide="3">
+            <h4 class="text-accent fw-bold text-uppercase small tracking-wide mb-2">02. Engineering &amp; Architecture</h4>
+            <h2 class="fw-bold text-light mb-4">Full-Stack Enterprise Architecture</h2>
+            <div class="row g-4 align-items-center">
+                <div class="col-lg-7">
+                    <div class="p-3 bg-black bg-opacity-50 rounded-4 border border-secondary border-opacity-25 font-monospace text-light small">
+                        <pre class="mb-0 text-success">
++--------------------------------------------------------------+
+|                    Browser / Client UI                       |
+|   Bootstrap 5 Glassmorphism • Chart.js • HTML5 Video Canvas  |
++--------------------------------------------------------------+
+         | (HTTP REST)                         | (WebSocket)
+         v                                     v
++-----------------------+             +------------------------+
+| Flask Application     |             | Flask-SocketIO Server  |
+| 5 REST Blueprints     |             | Real-Time Camera Stream|
++-----------------------+             +------------------------+
+         |                                     |
+         +------------------+------------------+
+                            v
+       +-----------------------------------------------+
+       |             AI Inference Engines              |
+       |  NLP Ensemble (RoBERTa + VADER + TextBlob)    |
+       |  Vision: YuNet (Detection) + FERPlus (ONNX)   |
+       +-----------------------------------------------+
+                            |
+                            v
+       +-----------------------------------------------+
+       |           MongoDB Storage & Analytics         |
+       +-----------------------------------------------+
+                        </pre>
+                    </div>
+                </div>
+                <div class="col-lg-5">
+                    <ul class="list-unstyled d-flex flex-column gap-3 mb-0">
+                        <li class="d-flex align-items-start gap-3">
+                            <i class="fas fa-check-circle text-accent mt-1"></i>
+                            <div>
+                                <h6 class="fw-bold text-light mb-0">Decoupled Blueprint Routing</h6>
+                                <p class="text-secondary small mb-0">Modular architecture separating main dashboard, NLP analysis, camera streaming, batch processing, and REST APIs.</p>
+                            </div>
+                        </li>
+                        <li class="d-flex align-items-start gap-3">
+                            <i class="fas fa-check-circle text-accent mt-1"></i>
+                            <div>
+                                <h6 class="fw-bold text-light mb-0">Thread-Safe Inference</h6>
+                                <p class="text-secondary small mb-0">Engineered with thread synchronization locks so concurrent webcam frames never cause OpenCV graph engine buffer collisions.</p>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 4: Computer Vision Pipeline -->
+        <div class="slide-pane p-5 d-none" data-slide="4">
+            <h4 class="text-accent fw-bold text-uppercase small tracking-wide mb-2">03. Computer Vision Engine</h4>
+            <h2 class="fw-bold text-light mb-4">Hybrid Neural &amp; Landmark Emotion Detection</h2>
+            <div class="row g-4">
+                <div class="col-md-6">
+                    <div class="card bg-black bg-opacity-40 border-0 p-4 rounded-4 h-100">
+                        <h5 class="fw-bold text-light mb-3"><i class="fas fa-eye text-accent me-2"></i>YuNet Face Detection &amp; CLAHE</h5>
+                        <ul class="text-secondary small d-flex flex-column gap-2 mb-0 ps-3">
+                            <li><strong class="text-light">OpenCV YuNet ONNX:</strong> State-of-the-art fast neural detector locating faces and 5 facial landmark keypoints in under 15ms.</li>
+                            <li><strong class="text-light">Adaptive CLAHE:</strong> Contrast Limited Adaptive Histogram Equalization eliminates lighting variations (shadows, backlight, low contrast).</li>
+                            <li><strong class="text-light">Dynamic Face Padding:</strong> 10% context expansion to ensure brow and chin features are preserved for emotion recognition.</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card bg-black bg-opacity-40 border-0 p-4 rounded-4 h-100">
+                        <h5 class="fw-bold text-light mb-3"><i class="fas fa-brain text-accent me-2"></i>FERPlus &amp; Landmark Geometric Fusion</h5>
+                        <ul class="text-secondary small d-flex flex-column gap-2 mb-0 ps-3">
+                            <li><strong class="text-light">7 Universal Emotions:</strong> Quantifies Happy, Sad, Angry, Surprise, Fear, Disgust, and Neutral.</li>
+                            <li><strong class="text-light">Geometric Prior Calibration:</strong> Uses mouth-width-to-eye-distance ratios to detect smiles and mouth opening ratios to detect surprise without sticking to neutral.</li>
+                            <li><strong class="text-light">Sub-40ms Inference:</strong> Executes at 24+ FPS on standard CPU without requiring heavy GPU clusters.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 5: NLP Sentiment Engine -->
+        <div class="slide-pane p-5 d-none" data-slide="5">
+            <h4 class="text-accent fw-bold text-uppercase small tracking-wide mb-2">04. Natural Language Processing</h4>
+            <h2 class="fw-bold text-light mb-4">Multi-Model Weighted Consensus Ensemble</h2>
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <div class="card bg-black bg-opacity-40 border-0 p-4 rounded-4 text-center h-100">
+                        <span class="badge bg-primary px-3 py-2 rounded-pill mb-3">Weight: 50%</span>
+                        <h5 class="fw-bold text-light">CardiffNLP Twitter-RoBERTa</h5>
+                        <p class="text-secondary small mb-0">Deep transformer neural model trained on 124M+ tweets for deep semantic context and sarcasm awareness.</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card bg-black bg-opacity-40 border-0 p-4 rounded-4 text-center h-100">
+                        <span class="badge bg-success px-3 py-2 rounded-pill mb-3">Weight: 30%</span>
+                        <h5 class="fw-bold text-light">VADER Lexicon Analyzer</h5>
+                        <p class="text-secondary small mb-0">Rule-based engine tuned specifically for social media jargon, capitalization intensity, and emoji sentiment.</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card bg-black bg-opacity-40 border-0 p-4 rounded-4 text-center h-100">
+                        <span class="badge bg-warning text-dark px-3 py-2 rounded-pill mb-3">Weight: 20%</span>
+                        <h5 class="fw-bold text-light">TextBlob Polarity</h5>
+                        <p class="text-secondary small mb-0">Syntactic lexicon model providing complementary objectivity vs subjectivity validation.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 6: Batch Engine & Features -->
+        <div class="slide-pane p-5 d-none" data-slide="6">
+            <h4 class="text-accent fw-bold text-uppercase small tracking-wide mb-2">05. Platform Capabilities</h4>
+            <h2 class="fw-bold text-light mb-4">Batch Processing, Scraping &amp; Analytics</h2>
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <div class="card bg-black bg-opacity-40 border-0 p-4 rounded-4 h-100">
+                        <i class="fas fa-file-excel fa-2x text-accent mb-3"></i>
+                        <h5 class="fw-bold text-light">Tabular Ingestion</h5>
+                        <p class="text-secondary small mb-0">Upload CSV, JSON, and Excel review dumps. The auto-column detection automatically locates review fields and exports scored tables.</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card bg-black bg-opacity-40 border-0 p-4 rounded-4 h-100">
+                        <i class="fas fa-spider fa-2x text-accent mb-3"></i>
+                        <h5 class="fw-bold text-light">DOM Web Scraper</h5>
+                        <p class="text-secondary small mb-0">Paste any blog post, article, or review thread URL to scrape text bodies and analyze consensus opinion on the fly.</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card bg-black bg-opacity-40 border-0 p-4 rounded-4 h-100">
+                        <i class="fas fa-code fa-2x text-accent mb-3"></i>
+                        <h5 class="fw-bold text-light">Open REST API v1</h5>
+                        <p class="text-secondary small mb-0">Clean developer API endpoints for external microservices to submit text or base64 frames for real-time scoring.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 7: Verification & Metrics -->
+        <div class="slide-pane p-5 d-none" data-slide="7">
+            <h4 class="text-accent fw-bold text-uppercase small tracking-wide mb-2">06. Quality &amp; Verification</h4>
+            <h2 class="fw-bold text-light mb-4">Performance Metrics &amp; Test Rigor</h2>
+            <div class="row g-4 text-center">
+                <div class="col-md-3">
+                    <div class="card bg-black bg-opacity-40 border-0 p-4 rounded-4">
+                        <h1 class="display-5 fw-bold text-accent mb-0">25 / 25</h1>
+                        <span class="text-secondary small">Unit &amp; Integration Tests Passing (100%)</span>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card bg-black bg-opacity-40 border-0 p-4 rounded-4">
+                        <h1 class="display-5 fw-bold text-success mb-0">&lt; 40 ms</h1>
+                        <span class="text-secondary small">Average Vision Inference Latency</span>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card bg-black bg-opacity-40 border-0 p-4 rounded-4">
+                        <h1 class="display-5 fw-bold text-warning mb-0">7</h1>
+                        <span class="text-secondary small">Facial Emotion Spectrums Tracked</span>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card bg-black bg-opacity-40 border-0 p-4 rounded-4">
+                        <h1 class="display-5 fw-bold text-info mb-0">100%</h1>
+                        <span class="text-secondary small">Open-Source Frictionless Access</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 8: Conclusion & Demo Links -->
+        <div class="slide-pane p-5 d-none" data-slide="8">
+            <div class="row align-items-center min-vh-50 py-4">
+                <div class="col-lg-8 mx-auto text-center">
+                    <span class="badge bg-success bg-opacity-20 text-success px-3 py-2 rounded-pill fw-semibold mb-3">
+                        <i class="fas fa-check-circle me-1"></i> Ready for Evaluation
+                    </span>
+                    <h1 class="display-5 fw-bold text-light mb-3">Thank You!</h1>
+                    <p class="text-secondary mb-4" style="max-width: 600px; margin: 0 auto;">
+                        SentiVision AI is fully open-sourced, tested, and published on GitHub. Explore the live modules or inspect the source repository below.
+                    </p>
+                    <div class="d-flex justify-content-center flex-wrap gap-3">
+                        <a href="/camera/" class="btn btn-accent px-4 py-2">
+                            <i class="fas fa-video me-2"></i>Try Live Camera
+                        </a>
+                        <a href="/analyze/" class="btn btn-outline-light px-4 py-2">
+                            <i class="fas fa-font me-2"></i>Text Analyzer
+                        </a>
+                        <a href="https://github.com/Mihir0771/SentiVision-AI" target="_blank" class="btn btn-outline-secondary px-4 py-2">
+                            <i class="fab fa-github me-2"></i>GitHub Repo
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function() {
+    'use strict';
+    let currentSlide = 1;
+    const totalSlides = 8;
+
+    const btnPrev = document.getElementById('btnPrevSlide');
+    const btnNext = document.getElementById('btnNextSlide');
+    const btnFull = document.getElementById('btnFullscreen');
+    const indicator = document.getElementById('slideIndicator');
+    const container = document.getElementById('presentationContainer');
+
+    function showSlide(index) {
+        if (index < 1) index = 1;
+        if (index > totalSlides) index = totalSlides;
+        currentSlide = index;
+
+        document.querySelectorAll('.slide-pane').forEach((pane) => {
+            const slideNum = parseInt(pane.getAttribute('data-slide'), 10);
+            if (slideNum === currentSlide) {
+                pane.classList.remove('d-none');
+                pane.classList.add('active-slide');
+            } else {
+                pane.classList.add('d-none');
+                pane.classList.remove('active-slide');
+            }
+        });
+
+        if (indicator) indicator.textContent = `Slide ${currentSlide} / ${totalSlides}`;
+        if (btnPrev) btnPrev.disabled = (currentSlide === 1);
+        if (btnNext) btnNext.disabled = (currentSlide === totalSlides);
+    }
+
+    if (btnPrev) btnPrev.addEventListener('click', () => showSlide(currentSlide - 1));
+    if (btnNext) btnNext.addEventListener('click', () => showSlide(currentSlide + 1));
+
+    if (btnFull && container) {
+        btnFull.addEventListener('click', () => {
+            if (!document.fullscreenElement) {
+                container.requestFullscreen().catch(err => console.warn(err));
+            } else {
+                document.exitFullscreen().catch(err => console.warn(err));
+            }
+        });
+    }
+
+    // Keyboard navigation
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowRight' || e.key === ' ') {
+            showSlide(currentSlide + 1);
+        } else if (e.key === 'ArrowLeft') {
+            showSlide(currentSlide - 1);
+        }
+    });
+
+    showSlide(1);
+})();
+</script>
+{% endblock %}

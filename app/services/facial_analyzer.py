@@ -18,6 +18,7 @@ from __future__ import annotations
 
 import logging
 import os
+import threading
 import urllib.request
 from datetime import datetime, timezone
 from typing import Any, Dict, Generator, List, Optional, Tuple
@@ -127,6 +128,7 @@ class FacialEmotionAnalyzer:
     ) -> None:
         self._backend = backend.lower()
         self._mtcnn = mtcnn
+        self._lock = threading.Lock()
         self._fer_detector: Any = None
         self._onnx_detector: Any = None
         self._onnx_emotion_net: Any = None
@@ -245,135 +247,136 @@ class FacialEmotionAnalyzer:
             return None
 
         try:
-            if len(frame.shape) == 2:
-                frame = cv2.cvtColor(frame, cv2.COLOR_GRAY2BGR)
-            elif frame.shape[2] == 4:
-                frame = cv2.cvtColor(frame, cv2.COLOR_BGRA2BGR)
+            with self._lock:
+                if len(frame.shape) == 2:
+                    frame = cv2.cvtColor(frame, cv2.COLOR_GRAY2BGR)
+                elif frame.shape[2] == 4:
+                    frame = cv2.cvtColor(frame, cv2.COLOR_BGRA2BGR)
 
-            h, w = frame.shape[:2]
-            detector.setInputSize((w, h))
-            detector.setScoreThreshold(0.35)
-            detector.setNMSThreshold(0.3)
-            retval, detected_faces = detector.detect(frame)
+                h, w = frame.shape[:2]
+                detector.setInputSize((w, h))
+                detector.setScoreThreshold(0.35)
+                detector.setNMSThreshold(0.3)
+                retval, detected_faces = detector.detect(frame)
 
-            if detected_faces is None or len(detected_faces) == 0:
+                if detected_faces is None or len(detected_faces) == 0:
+                    return {
+                        "faces_detected": 0,
+                        "faces": [],
+                        "image_width": w,
+                        "image_height": h,
+                        "analyzed_at": _timestamp(),
+                    }
+
+                faces: List[Dict[str, Any]] = []
+                for face in detected_faces:
+                    x = max(0, int(face[0]))
+                    y = max(0, int(face[1]))
+                    box_w = min(w - x, int(face[2]))
+                    box_h = min(h - y, int(face[3]))
+                    face_score = float(face[14]) if len(face) > 14 else 0.9
+
+                    if box_w < 10 or box_h < 10:
+                        continue
+
+                    # Add 10% padding for facial emotion context
+                    pad_x = int(box_w * 0.1)
+                    pad_y = int(box_h * 0.1)
+                    crop_x1 = max(0, x - pad_x)
+                    crop_y1 = max(0, y - pad_y)
+                    crop_x2 = min(w, x + box_w + pad_x)
+                    crop_y2 = min(h, y + box_h + pad_y)
+                    face_crop = frame[crop_y1:crop_y2, crop_x1:crop_x2]
+
+                    if face_crop.size == 0:
+                        continue
+
+                    # Prepare for FERPlus (64x64 grayscale with adaptive CLAHE contrast enhancement)
+                    gray_face = cv2.cvtColor(face_crop, cv2.COLOR_BGR2GRAY)
+                    clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
+                    enhanced_face = clahe.apply(gray_face)
+
+                    blob = cv2.dnn.blobFromImage(enhanced_face, 1.0, (64, 64), (0,))
+                    emotion_net.setInput(blob)
+                    out = emotion_net.forward()[0]
+
+                    # Extract 7 basic emotions (neutral, happy, surprise, sad, angry, disgust, fear)
+                    raw_logits = np.array(out[:7], dtype=np.float32)
+
+                    # Prior calibration: dampen neutral bias inherent in raw dataset
+                    calibrated_logits = raw_logits.copy()
+                    calibrated_logits[0] -= 0.35  # neutral baseline adjustment
+
+                    # Multi-modal fusion with YuNet 5-point facial landmark geometry
+                    if len(face) >= 14:
+                        re_x, re_y = float(face[4]), float(face[5])
+                        le_x, le_y = float(face[6]), float(face[7])
+                        nose_x, nose_y = float(face[8]), float(face[9])
+                        rm_x, rm_y = float(face[10]), float(face[11])
+                        lm_x, lm_y = float(face[12]), float(face[13])
+
+                        # Inter-ocular distance (baseline scale for face geometry)
+                        inter_ocular = max(1.0, float(np.hypot(le_x - re_x, le_y - re_y)))
+
+                        # Mouth width expansion (zygomaticus major activation / smile)
+                        mouth_width = float(np.hypot(lm_x - rm_x, lm_y - rm_y))
+                        mouth_eye_ratio = mouth_width / inter_ocular
+
+                        # Jaw opening ratio (mouth center to nose distance)
+                        mouth_center_y = (rm_y + lm_y) / 2.0
+                        jaw_drop_ratio = (mouth_center_y - nose_y) / inter_ocular
+
+                        # Responsive smile boost when mouth widens
+                        if mouth_eye_ratio > 0.90:
+                            smile_factor = min(1.5, (mouth_eye_ratio - 0.90) / 0.15)
+                            calibrated_logits[1] += 1.2 * smile_factor
+                            calibrated_logits[0] -= 0.8 * smile_factor
+
+                        # Responsive surprise boost when jaw drops
+                        if jaw_drop_ratio > 0.85:
+                            surprise_factor = min(1.5, (jaw_drop_ratio - 0.85) / 0.15)
+                            calibrated_logits[2] += 1.3 * surprise_factor
+                            calibrated_logits[0] -= 0.7 * surprise_factor
+
+                    # Temperature scaling (T=0.8 for crisp, decisive confidence peaks)
+                    temperature = 0.80
+                    scaled_logits = calibrated_logits / temperature
+                    exp_scores = np.exp(scaled_logits - np.max(scaled_logits))
+                    probs = exp_scores / np.sum(exp_scores)
+
+                    emotions = {
+                        "neutral": round(float(probs[0]), 4),
+                        "happy": round(float(probs[1]), 4),
+                        "surprise": round(float(probs[2]), 4),
+                        "sad": round(float(probs[3]), 4),
+                        "angry": round(float(probs[4]), 4),
+                        "disgust": round(float(probs[5]), 4),
+                        "fear": round(float(probs[6]), 4),
+                    }
+
+                    dominant = max(emotions, key=emotions.get)
+                    confidence = emotions[dominant]
+
+                    faces.append({
+                        "box": {
+                            "x": x,
+                            "y": y,
+                            "w": box_w,
+                            "h": box_h,
+                        },
+                        "emotions": emotions,
+                        "dominant_emotion": dominant,
+                        "confidence": confidence,
+                        "face_confidence": round(face_score, 4),
+                    })
+
                 return {
-                    "faces_detected": 0,
-                    "faces": [],
+                    "faces_detected": len(faces),
+                    "faces": faces,
                     "image_width": w,
                     "image_height": h,
                     "analyzed_at": _timestamp(),
                 }
-
-            faces: List[Dict[str, Any]] = []
-            for face in detected_faces:
-                x = max(0, int(face[0]))
-                y = max(0, int(face[1]))
-                box_w = min(w - x, int(face[2]))
-                box_h = min(h - y, int(face[3]))
-                face_score = float(face[14]) if len(face) > 14 else 0.9
-
-                if box_w < 10 or box_h < 10:
-                    continue
-
-                # Add 10% padding for facial emotion context
-                pad_x = int(box_w * 0.1)
-                pad_y = int(box_h * 0.1)
-                crop_x1 = max(0, x - pad_x)
-                crop_y1 = max(0, y - pad_y)
-                crop_x2 = min(w, x + box_w + pad_x)
-                crop_y2 = min(h, y + box_h + pad_y)
-                face_crop = frame[crop_y1:crop_y2, crop_x1:crop_x2]
-
-                if face_crop.size == 0:
-                    continue
-
-                # Prepare for FERPlus (64x64 grayscale with adaptive CLAHE contrast enhancement)
-                gray_face = cv2.cvtColor(face_crop, cv2.COLOR_BGR2GRAY)
-                clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
-                enhanced_face = clahe.apply(gray_face)
-
-                blob = cv2.dnn.blobFromImage(enhanced_face, 1.0, (64, 64), (0,))
-                emotion_net.setInput(blob)
-                out = emotion_net.forward()[0]
-
-                # Extract 7 basic emotions (neutral, happy, surprise, sad, angry, disgust, fear)
-                raw_logits = np.array(out[:7], dtype=np.float32)
-
-                # Prior calibration: dampen neutral bias inherent in raw dataset
-                calibrated_logits = raw_logits.copy()
-                calibrated_logits[0] -= 0.35  # neutral baseline adjustment
-
-                # Multi-modal fusion with YuNet 5-point facial landmark geometry
-                if len(face) >= 14:
-                    re_x, re_y = float(face[4]), float(face[5])
-                    le_x, le_y = float(face[6]), float(face[7])
-                    nose_x, nose_y = float(face[8]), float(face[9])
-                    rm_x, rm_y = float(face[10]), float(face[11])
-                    lm_x, lm_y = float(face[12]), float(face[13])
-
-                    # Inter-ocular distance (baseline scale for face geometry)
-                    inter_ocular = max(1.0, float(np.hypot(le_x - re_x, le_y - re_y)))
-
-                    # Mouth width expansion (zygomaticus major activation / smile)
-                    mouth_width = float(np.hypot(lm_x - rm_x, lm_y - rm_y))
-                    mouth_eye_ratio = mouth_width / inter_ocular
-
-                    # Jaw opening ratio (mouth center to nose distance)
-                    mouth_center_y = (rm_y + lm_y) / 2.0
-                    jaw_drop_ratio = (mouth_center_y - nose_y) / inter_ocular
-
-                    # Responsive smile boost when mouth widens
-                    if mouth_eye_ratio > 0.90:
-                        smile_factor = min(1.5, (mouth_eye_ratio - 0.90) / 0.15)
-                        calibrated_logits[1] += 1.2 * smile_factor
-                        calibrated_logits[0] -= 0.8 * smile_factor
-
-                    # Responsive surprise boost when jaw drops
-                    if jaw_drop_ratio > 0.85:
-                        surprise_factor = min(1.5, (jaw_drop_ratio - 0.85) / 0.15)
-                        calibrated_logits[2] += 1.3 * surprise_factor
-                        calibrated_logits[0] -= 0.7 * surprise_factor
-
-                # Temperature scaling (T=0.8 for crisp, decisive confidence peaks)
-                temperature = 0.80
-                scaled_logits = calibrated_logits / temperature
-                exp_scores = np.exp(scaled_logits - np.max(scaled_logits))
-                probs = exp_scores / np.sum(exp_scores)
-
-                emotions = {
-                    "neutral": round(float(probs[0]), 4),
-                    "happy": round(float(probs[1]), 4),
-                    "surprise": round(float(probs[2]), 4),
-                    "sad": round(float(probs[3]), 4),
-                    "angry": round(float(probs[4]), 4),
-                    "disgust": round(float(probs[5]), 4),
-                    "fear": round(float(probs[6]), 4),
-                }
-
-                dominant = max(emotions, key=emotions.get)
-                confidence = emotions[dominant]
-
-                faces.append({
-                    "box": {
-                        "x": x,
-                        "y": y,
-                        "w": box_w,
-                        "h": box_h,
-                    },
-                    "emotions": emotions,
-                    "dominant_emotion": dominant,
-                    "confidence": confidence,
-                    "face_confidence": round(face_score, 4),
-                })
-
-            return {
-                "faces_detected": len(faces),
-                "faces": faces,
-                "image_width": w,
-                "image_height": h,
-                "analyzed_at": _timestamp(),
-            }
         except Exception as exc:
             logger.error("ONNX Face+Emotion analysis error: %s", exc)
             return None

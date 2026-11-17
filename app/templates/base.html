@@ -75,6 +75,12 @@
                         </a>
                     </li>
                     <li class="nav-item">
+                        <a class="nav-link {% if request.endpoint == 'main.presentation' %}active{% endif %}"
+                           href="{{ url_for('main.presentation') }}">
+                            <i class="fas fa-desktop me-1"></i> Presentation
+                        </a>
+                    </li>
+                    <li class="nav-item">
                         <a class="nav-link {% if request.endpoint == 'main.api_docs' %}active{% endif %}"
                            href="{{ url_for('main.api_docs') }}">
                             <i class="fas fa-book me-1"></i> API Docs

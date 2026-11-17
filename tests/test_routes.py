@@ -22,6 +22,13 @@ def test_about_route(client: FlaskClient):
     assert b"About" in response.data
 
 
+def test_presentation_route(client: FlaskClient):
+    """Test project presentation deck route."""
+    response = client.get("/presentation")
+    assert response.status_code == 200
+    assert b"Project Presentation Deck" in response.data
+
+
 def test_analyze_route(client: FlaskClient):
     """Test interactive text analysis page route."""
     response = client.get("/analyze/")

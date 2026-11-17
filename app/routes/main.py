@@ -5,8 +5,9 @@ Main routes blueprint — serves dashboard, landing, about, and health check.
 from __future__ import annotations
 
 import logging
+import os
 from typing import Any, Dict
-from flask import Blueprint, current_app, jsonify, render_template
+from flask import Blueprint, current_app, jsonify, render_template, send_from_directory
 from flask_login import current_user
 
 from app.models.analysis import Analysis
@@ -46,7 +47,7 @@ def dashboard():
                 "negative": dist.get("negative", 0),
                 "neutral": dist.get("neutral", 0),
             }
-            recent = Analysis.find_by_user(db, user_id, limit=8)
+            recent = Analysis.find_by_user(db, None, limit=8)
             recent_analyses = [a.to_dict() for a in recent]
         except Exception as e:
             logger.warning("Error fetching dashboard statistics from database: %s", e)
@@ -70,6 +71,22 @@ def about():
 def api_docs():
     """Render Interactive REST API Documentation."""
     return render_template("api_docs.html")
+
+
+@bp.route("/presentation")
+def presentation():
+    """Render interactive internship capstone presentation deck."""
+    return render_template("presentation.html")
+
+
+@bp.route("/favicon.ico")
+def favicon():
+    """Serve brand favicon from static directory to eliminate 404 logs."""
+    return send_from_directory(
+        os.path.join(current_app.root_path, "static", "img"),
+        "logo.svg",
+        mimetype="image/svg+xml",
+    )
 
 
 @bp.route("/health")
